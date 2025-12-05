@@ -9,16 +9,7 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-
-enum class CommandTypeEnum
-{
-  SESSION_CREATE = 0, // Incoming offer, outbound call request
-  SESSION_ACCEPT,     // Accept session, or notification
-  SESSION_REJECT,
-  SESSION_MODIFY,
-  SESSION_TERMINATE
-};
+#include <memory>
 
 using CommandType = std::size_t;
 

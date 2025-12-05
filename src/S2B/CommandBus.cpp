@@ -49,7 +49,6 @@ void CommandBus::subscribe(CommandType c, std::shared_ptr<CommandBusSubscriber> 
 {
   post(
     [this, c, sub]() {
-      LOG_INFO("SUBSCRIBED FOR TYPE {}", c);
       m_subscribers[c].push_back(sub);
     }
   );
