@@ -8,4 +8,58 @@
  ***************************************************/
 
 #include "CommandBus.hpp"
+#include <Logger/Logger.hpp>
 
+CommandBus::CommandBus()
+  : m_ioct(1)
+#if BOOST_ASIO_VERSION < 103400
+  , m_workGuard(m_ioct)
+#else
+  , m_workGuard(boost::asio::make_work_guard(m_ioct))
+#endif
+{
+}
+
+CommandBus::~CommandBus()
+{
+  post( // Make sure all previous work is done before stop() is executed
+    [this]() {
+      m_ioct.stop();
+    }
+  );
+  m_ioct.wait();
+}
+
+void CommandBus::notifyAll(const Command & cmd)
+{
+  auto subscribers = m_subscribers.find(cmd.type());
+  if (subscribers != m_subscribers.end())
+  {
+    for (auto &sub : subscribers->second)
+    {
+      if (auto subscriber = sub.lock())
+      {
+        subscriber->notify(cmd);
+      }
+    }
+  }
+}
+
+void CommandBus::subscribe(CommandType c, std::shared_ptr<CommandBusSubscriber> sub)
+{
+  post(
+    [this, c, sub]() {
+      LOG_INFO("SUBSCRIBED FOR TYPE {}", c);
+      m_subscribers[c].push_back(sub);
+    }
+  );
+}
+
+void CommandBus::publish(std::unique_ptr<Command> && cmd)
+{
+  auto callback = 
+    [this, cmd = std::move(cmd)]() mutable {
+      notifyAll(*cmd);
+    };
+  post(std::move(callback));
+}

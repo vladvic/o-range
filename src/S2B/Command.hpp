@@ -8,7 +8,10 @@
  ***************************************************/
 #pragma once
 
-enum class CommandType
+#include <cstddef>
+#include <cstdint>
+
+enum class CommandTypeEnum
 {
   SESSION_CREATE = 0, // Incoming offer, outbound call request
   SESSION_ACCEPT,     // Accept session, or notification
@@ -17,11 +20,19 @@ enum class CommandType
   SESSION_TERMINATE
 };
 
+using CommandType = std::size_t;
+
 class Command
 {
 public:
   virtual ~Command() = default;
 
-  virtual CommandType type();
+  virtual CommandType type() const = 0;
+
+  template<class C, typename ...Args>
+  static std::unique_ptr<Command> makeUnique(Args... args)
+  {
+    return std::unique_ptr<Command>(new C(args...));
+  }
 };
 
