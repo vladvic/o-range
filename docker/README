@@ -1,0 +1,7 @@
+To build image:
+
+docker build --rm --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) -t resiprocate-dev .
+
+To run container
+
+docker run -it --rm -v <workdir on host machine>:/home/developer/work --name resiprocate resiprocate-dev
