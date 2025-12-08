@@ -17,7 +17,7 @@ namespace util
 template<typename T>
 class Singleton
 {
-  static T * s_instance;
+  static Singleton * s_instance;
 
 public:
   Singleton()
@@ -42,11 +42,11 @@ public:
       throw std::runtime_error(std::format("Singleton of type {} does not exist!", typeid(T).name()));
     }
 
-    return *s_instance;
+    return dynamic_cast<T &>(*s_instance);
   }
 };
 
 template<typename T>
-T * Singleton<T>::s_instance = nullptr;
+Singleton<T> * Singleton<T>::s_instance = nullptr;
 
 }

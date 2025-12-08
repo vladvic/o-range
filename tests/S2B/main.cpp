@@ -64,6 +64,6 @@ int main()
   bus.subscribe(PrintCommand::commandType, sub);
   for (int i = 0; i < 100; ++i)
   {
-    bus.publish(Command::makeUnique<PrintCommand>("Hello world "+std::to_string(i)+"!"));
+    bus.publish(std::make_unique<PrintCommand>("Hello world "+std::to_string(i)+"!"));
   }
 }
