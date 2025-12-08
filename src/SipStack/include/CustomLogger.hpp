@@ -15,24 +15,26 @@ public:
       const resip::Data& message,
       const resip::Data& messageWithHeaders,
       const resip::Data& instanceName) override {
-        std::string msgStr = std::format("[{}:{} {}]: {}", file, line, subsystem.getSubsystem().c_str(), message.c_str());
+        Logger::LogLevel level;
         switch(level) {
             case resip::Log::Debug:
-                LOG_DEBUG(msgStr);
+                level = Logger::LogLevel::debug;
                 break;
             case resip::Log::Info:
-                LOG_INFO(msgStr);
+                level = Logger::LogLevel::info;
                 break;
             case resip::Log::Warning:
-                LOG_WARN(msgStr);
+                level = Logger::LogLevel::warning;
                 break;
             case resip::Log::Err:
-                LOG_ERROR(msgStr);
+                level = Logger::LogLevel::error;
                 break;
             case resip::Log::Crit:
-                LOG_CRITICAL(msgStr);
+                level = Logger::LogLevel::critical;
                 break;
         }
+        Logger::Log::log(Logger::SourceLocation(subsystem.getSubsystem.c_str(), file, line), level, 
+                        "ReSIP: {}", message);
         return true;
       }
 

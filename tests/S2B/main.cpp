@@ -21,7 +21,7 @@ class SimpleLogger
 {
 public:
   void emit_message(LogLevel lvl, SinkType sink, std::string_view msg,
-      const std::source_location loc) override
+      const Logger::SourceLocation &loc) override
   {
     std::cerr << msg << std::endl;
   }
