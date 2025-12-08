@@ -1,10 +1,9 @@
 #include <SipStack.hpp>
+#include <boost/asio.hpp>
 #include <resip/dum/DialogUsageManager.hxx>
 #include <resip/dum/InviteSessionHandler.hxx>
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
-#include <rutil/Log.hxx>
-#include <rutil/Logger.hxx>
 
 SipStack::SipStack()
     : m_masterProfile(std::make_shared<resip::MasterProfile>()),
@@ -13,9 +12,9 @@ SipStack::SipStack()
       m_stack(0, resip::DnsStub::EmptyNameserverList, m_intr, false, 0, 0,
               m_pollGrp),
       m_DUM(m_stack),
-      m_stackThread(m_stack, *m_intr, *m_pollGrp) {
-  resip::Log::initialize(resip::Log::Type::OnlyExternal, resip::Log::Debug,
-                         "MySipApp", m_logger);
+      m_stackThread(m_stack, *m_intr, *m_pollGrp),
+      m_DUMIOContext(std::make_shared<boost::asio::io_context>()),
+      m_sessionHandler(m_DUMIOContext) {
   m_stack.addTransport(resip::UDP, 5060);
 
   m_masterProfile->addSupportedMethod(resip::INVITE);
@@ -26,11 +25,7 @@ SipStack::SipStack()
 
   m_stackThread.run();
 
-  m_DUMThread = std::move(std::thread([this]() {
-    while (m_running) {
-      m_DUM.process(50);
-    }
-  }));
+  startDUM();
 }
 
 SipStack::~SipStack() {
@@ -42,14 +37,19 @@ SipStack::~SipStack() {
   m_stackThread.join();
 }
 
-void SipStack::createAndInitInstance() { s_instance = new SipStack(); }
+void SipStack::startDUM() {
+  boost::asio::co_spawn(
+      *m_DUMIOContext,
+      [this]() -> boost::asio::awaitable<void> {
+        boost::asio::steady_timer timer(
+            co_await boost::asio::this_coro::executor);
+        while (m_running) {
+          timer.expires_after(std::chrono::milliseconds(50));
+          co_await timer.async_wait(boost::asio::use_awaitable);
+          while (m_DUM.process());
+        }
+      },
+      boost::asio::detached);
 
-SipStack* SipStack::getInstance() {
-  if (s_instance == nullptr) {
-    throw std::runtime_error("SipStack instance is not created");
-  }
-
-  return s_instance;
+  m_DUMThread = std::move(std::thread([this]() { m_DUMIOContext->run(); }));
 }
-
-SipStack* SipStack::s_instance = nullptr;

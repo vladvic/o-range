@@ -1,10 +1,19 @@
 #include <SipStack.hpp>
 #include <thread>
 
+class SimpleLogger : public Logger::ILoggerImpl {
+ public:
+  void emit_message(Logger::LogLevel lvl, Logger::SinkType sink,
+                    std::string_view msg,
+                    const Logger::SourceLocation& loc) override {
+    std::cerr << msg << std::endl;
+  }
+};
+
 int main() {
   try {
-    SipStack::createAndInitInstance();
-    SipStack* sipStack = SipStack::getInstance();
+    SimpleLogger logger;
+    SipStack stack;
 
     // Keep the application running to process SIP messages
     while (true) {

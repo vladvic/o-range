@@ -7,21 +7,24 @@
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
 #include <thread>
+#include <util/Singleton.hpp>
 
 namespace resip {
 class FdPollGrp;
 }
 
-class SipStack {
+namespace boost::asio {
+class io_context;
+}
+
+class SipStack : public util::Singleton<SipStack> {
  public:
   SipStack();
   ~SipStack();
-  static void createAndInitInstance();
-  static SipStack* getInstance();
 
  private:
-  static SipStack* s_instance;
-
+  void startDUM();
+  CustomLogger m_logger;
   std::shared_ptr<resip::MasterProfile> m_masterProfile;
   resip::FdPollGrp* m_pollGrp;
   resip::EventThreadInterruptor* m_intr;
@@ -29,7 +32,7 @@ class SipStack {
   resip::DialogUsageManager m_DUM;
   resip::EventStackThread m_stackThread;
   std::thread m_DUMThread;
+  std::shared_ptr<boost::asio::io_context> m_DUMIOContext;
   ORangeSessionHandler m_sessionHandler;
-  CustomLogger m_logger;
   bool m_running{true};
 };

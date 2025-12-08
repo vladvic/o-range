@@ -1,4 +1,5 @@
 #include <ORangeSessionHandler.hpp>
+#include <boost/asio.hpp>
 #include <iostream>
 #include <resip/dum/ServerInviteSession.hxx>
 
@@ -9,7 +10,21 @@ void ORangeSessionHandler::onNewSession(
             << static_cast<int>(oat) << std::endl;
   std::cout << "SIP Message: " << msg.brief() << std::endl;
 
-  h->provisional(100);
-  h->reject(486);
+  if (auto ioctx = m_DUMIOContext.lock()) {
+    boost::asio::co_spawn(
+        *ioctx,
+        [h]() mutable -> boost::asio::awaitable<void> {
+          boost::asio::steady_timer timer(
+              co_await boost::asio::this_coro::executor);
+
+          timer.expires_after(std::chrono::milliseconds(500));
+          co_await timer.async_wait(boost::asio::use_awaitable);
+          if (h.isValid()) {
+            h->reject(486);
+          }
+        },
+        boost::asio::detached);
+  }
+
   // Handle new incoming session here
 }

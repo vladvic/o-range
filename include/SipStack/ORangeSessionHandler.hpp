@@ -2,9 +2,14 @@
 
 #include <resip/dum/InviteSessionHandler.hxx>
 
+namespace boost::asio {
+class io_context;
+}
+
 class ORangeSessionHandler : public resip::InviteSessionHandler {
  public:
-  ORangeSessionHandler() = default;
+  ORangeSessionHandler(std::shared_ptr<boost::asio::io_context>& ctx)
+      : m_DUMIOContext(ctx) {}
   ~ORangeSessionHandler() override = default;
 
   void onNewSession(resip::ServerInviteSessionHandle,
@@ -61,4 +66,7 @@ class ORangeSessionHandler : public resip::InviteSessionHandler {
   void onReferAccepted(resip::InviteSessionHandle,
                        resip::ClientSubscriptionHandle,
                        const resip::SipMessage& msg) override {}
+
+ private:
+  std::weak_ptr<boost::asio::io_context> m_DUMIOContext;
 };

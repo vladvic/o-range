@@ -3,9 +3,15 @@
 #include <Logger/Logger.hpp>
 #include <format>
 #include <rutil/Log.hxx>
+#include <rutil/Subsystem.hxx>
 
 class CustomLogger : public resip::ExternalLogger {
  public:
+  CustomLogger() {
+    resip::Log::initialize(resip::Log::Type::OnlyExternal, resip::Log::Debug,
+                           "MySipApp", *this);
+  }
+
   bool operator()(resip::Log::Level level, const resip::Subsystem& subsystem,
                   const resip::Data& appName, const char* file, int line,
                   const resip::Data& message,
