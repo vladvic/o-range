@@ -13,6 +13,6 @@ target_link_libraries(r-range PUBLIC
   logger
 )
 
-target_include_directories(r-range PUBLIC
-  ${CMAKE_SOURCE_DIR}/src
+target_include_directories(r-range PRIVATE
+  ${CMAKE_SOURCE_DIR}/include/R-Range
 )

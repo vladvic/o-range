@@ -13,6 +13,6 @@ target_link_libraries(s2b PUBLIC
   logger
 )
 
-target_include_directories(s2b PUBLIC
-  ${CMAKE_SOURCE_DIR}/src
+target_include_directories(s2b PRIVATE
+  ${CMAKE_SOURCE_DIR}/include/S2B
 )

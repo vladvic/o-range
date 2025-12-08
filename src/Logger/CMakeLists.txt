@@ -6,6 +6,7 @@ add_library(logger
 
 set_property(TARGET logger PROPERTY POSITION_INDEPENDENT_CODE FALSE)
 
-target_include_directories(logger PUBLIC
-  ${CMAKE_SOURCE_DIR}/src
+target_include_directories(logger PRIVATE
+  ${CMAKE_SOURCE_DIR}/include/Logger
+  ${CMAKE_SOURCE_DIR}/include
 )

@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <memory>
 
-#include "Command.hpp"
+#include <Command.hpp>
 
 bool CompletionToken::operator==(const CompletionToken &other)
 {

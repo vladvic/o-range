@@ -11,5 +11,5 @@ target_link_libraries(r-range-test PUBLIC
 )
 
 target_include_directories(r-range PUBLIC
-  ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_SOURCE_DIR}/include
 )

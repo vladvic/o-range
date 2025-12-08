@@ -1,6 +1,6 @@
 set(SRC
-        src/SipStack.cpp
-        src/ORangeSessionHandler.cpp
+        SipStack.cpp
+        ORangeSessionHandler.cpp
    )
 
 find_library(Boost COMPONENTS asio)
@@ -19,7 +19,6 @@ target_link_libraries(sip_stack PUBLIC
   logger
 )
 
-target_include_directories(sip_stack PUBLIC
-  ${CMAKE_SOURCE_DIR}/src
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories(sip_stack PRIVATE
+  ${CMAKE_SOURCE_DIR}/include/SipStack
 )

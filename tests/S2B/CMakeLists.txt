@@ -11,5 +11,5 @@ target_link_libraries(s2b-test PUBLIC
 )
 
 target_include_directories(s2b PUBLIC
-  ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_SOURCE_DIR}/include
 )
