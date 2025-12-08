@@ -13,31 +13,6 @@
 namespace Logger
 {
 
-ILoggerImpl* ILoggerImpl::s_instance = nullptr;
-
-ILoggerImpl& ILoggerImpl::instance()
-{
-  if (s_instance == nullptr)
-  {
-    throw std::runtime_error("Logger instance does not exists!");
-  }
-  return *s_instance;
-}
-
-ILoggerImpl::ILoggerImpl()
-{
-  if (s_instance != nullptr)
-  {
-    throw std::runtime_error("Logger instance already exists!");
-  }
-  s_instance = this;
-}
-
-ILoggerImpl::~ILoggerImpl()
-{
-  s_instance = NULL;
-}
-
 LogEmitter::LogEmitter(ILoggerImpl& lg, LogLevel lvl, std::string msg, std::source_location loc)
   : m_logger(lg), m_level(lvl), m_msg(std::move(msg)), m_location(loc)
 {

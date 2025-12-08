@@ -13,17 +13,22 @@
 
 using CommandType = std::size_t;
 
+class CompletionToken
+{
+public:
+  bool operator==(const CompletionToken &);
+};
+
 class Command
 {
+  std::shared_ptr<CompletionToken> m_completionToken;
+
 public:
   virtual ~Command() = default;
 
   virtual CommandType type() const = 0;
 
-  template<class C, typename ...Args>
-  static std::unique_ptr<Command> makeUnique(Args... args)
-  {
-    return std::unique_ptr<Command>(new C(args...));
-  }
+  std::shared_ptr<CompletionToken> getCompletionToken() const;
+  void setCompletionToken(std::shared_ptr<CompletionToken> t = std::make_shared<CompletionToken>());
 };
 

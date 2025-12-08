@@ -62,5 +62,8 @@ int main()
   auto sub = std::make_shared<SimpleSubscriber>();
   CommandBus bus;
   bus.subscribe(PrintCommand::commandType, sub);
-  bus.publish(Command::makeUnique<PrintCommand>("Hello world!"));
+  for (int i = 0; i < 100; ++i)
+  {
+    bus.publish(Command::makeUnique<PrintCommand>("Hello world "+std::to_string(i)+"!"));
+  }
 }

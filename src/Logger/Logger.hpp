@@ -16,6 +16,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include <util/Singleton.hpp>
 
 namespace Logger
 {
@@ -39,21 +40,17 @@ enum class SinkType
 class Log;
 
 class ILoggerImpl
+  : public util::Singleton<ILoggerImpl>
 {
   friend class Log;
 
   public:
-  ILoggerImpl();
-  virtual ~ILoggerImpl();
+  virtual ~ILoggerImpl() = default;
   virtual void emit_message(LogLevel lvl, SinkType sink, std::string_view msg,
       const std::source_location loc = std::source_location::current()) = 0;
 
   protected:
-  static ILoggerImpl& instance();
   virtual void flush() { }
-
-  private:
-  static ILoggerImpl* s_instance;
 };
 
 class LogEmitter
