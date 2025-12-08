@@ -15,27 +15,27 @@ public:
       const resip::Data& message,
       const resip::Data& messageWithHeaders,
       const resip::Data& instanceName) override {
-        Logger::LogLevel level;
+        Logger::Log::log(Logger::SourceLocation(subsystem.getSubsystem().c_str(), file, line),
+                        mapResipLogLevel2LogLevel(level),
+                        "ReSIP: {}", message.c_str());
+        return true;
+    }
+
+    static Logger::LogLevel mapResipLogLevel2LogLevel(resip::Log::Level level) {
         switch(level) {
             case resip::Log::Debug:
-                level = Logger::LogLevel::debug;
-                break;
+                return Logger::LogLevel::debug;
             case resip::Log::Info:
-                level = Logger::LogLevel::info;
-                break;
+                return Logger::LogLevel::info;
             case resip::Log::Warning:
-                level = Logger::LogLevel::warning;
-                break;
+                return Logger::LogLevel::warn;
             case resip::Log::Err:
-                level = Logger::LogLevel::error;
-                break;
+                return Logger::LogLevel::error;
             case resip::Log::Crit:
-                level = Logger::LogLevel::critical;
-                break;
+                return Logger::LogLevel::critical;
+            default:
+                return Logger::LogLevel::debug;
         }
-        Logger::Log::log(Logger::SourceLocation(subsystem.getSubsystem.c_str(), file, line), level, 
-                        "ReSIP: {}", message);
-        return true;
-      }
+    }
 
 };
