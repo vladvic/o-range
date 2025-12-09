@@ -1,7 +1,11 @@
 #pragma once
 
+#undef LOG_DEBUG
+#undef LOG_INFO
+
 #include <CustomLogger.hpp>
 #include <ORangeSessionHandler.hpp>
+#include <boost/asio/io_context.hpp>
 #include <memory>
 #include <resip/dum/MasterProfile.hxx>
 #include <resip/stack/EventStackThread.hxx>
@@ -13,14 +17,11 @@ namespace resip {
 class FdPollGrp;
 }
 
-namespace boost::asio {
-class io_context;
-}
-
 class SipStack : public util::Singleton<SipStack> {
  public:
   SipStack();
   ~SipStack();
+  auto& getDUMIOContext() { return m_IOContext; }
 
  private:
   void startDUM();
@@ -32,7 +33,7 @@ class SipStack : public util::Singleton<SipStack> {
   resip::DialogUsageManager m_DUM;
   resip::EventStackThread m_stackThread;
   std::thread m_DUMThread;
-  std::shared_ptr<boost::asio::io_context> m_DUMIOContext;
+  boost::asio::io_context m_IOContext;
   ORangeSessionHandler m_sessionHandler;
   bool m_running{true};
 };
