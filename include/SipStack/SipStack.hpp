@@ -5,23 +5,30 @@
 
 #include <CustomLogger.hpp>
 #include <ORangeSessionHandler.hpp>
+#include <S2B/CommandBus.hpp>
 #include <boost/asio/io_context.hpp>
-#include <memory>
 #include <resip/dum/MasterProfile.hxx>
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
-#include <thread>
 #include <util/Singleton.hpp>
+#include <memory>
+#include <thread>
 
 namespace resip {
 class FdPollGrp;
 }
 
-class SipStack : public util::Singleton<SipStack> {
+class CommandBus;
+
+class SipStack : public util::Singleton<SipStack>,
+                 public CommandBusSubscriber,
+                 public std::enable_shared_from_this<SipStack> {
  public:
   SipStack();
   ~SipStack();
   auto& getDUMIOContext() { return m_IOContext; }
+  void notify(const Command& cmd) override;
+  void subscribe(CommandBus& bus);
 
  private:
   void startDUM();

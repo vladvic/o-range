@@ -8,7 +8,7 @@
 class CustomLogger : public resip::ExternalLogger {
  public:
   CustomLogger() {
-    resip::Log::initialize(resip::Log::Type::OnlyExternal, resip::Log::Info,
+    resip::Log::initialize(resip::Log::Type::OnlyExternal, resip::Log::Debug,
                            "MySipApp", *this);
   }
 

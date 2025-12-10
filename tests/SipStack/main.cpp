@@ -1,4 +1,7 @@
 #include <SipStack.hpp>
+#include <SIPCommand.hpp>
+#include <Media.hpp>
+
 #include <thread>
 
 class SimpleLogger : public Logger::ILoggerImpl {
@@ -13,7 +16,13 @@ class SimpleLogger : public Logger::ILoggerImpl {
 int main() {
   try {
     SimpleLogger logger;
-    SipStack stack;
+    CommandBus bus;
+    auto stack = std::make_shared<SipStack>();
+    stack->subscribe(bus);
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    bus.publish(std::make_unique<SIPCommand>(SIPCommandTypeEnum::SESSION_CREATE));
+    std::cout << "Publish SIP command" << std::endl;
 
     // Keep the application running to process SIP messages
     while (true) {

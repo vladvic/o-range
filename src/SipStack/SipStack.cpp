@@ -4,6 +4,9 @@
 #include <resip/dum/InviteSessionHandler.hxx>
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
+#include <resip/dum/AppDialogSet.hxx>
+#include <resip/dum/AppDialog.hxx>
+#include <S2B/SIPCommand.hpp>
 
 SipStack::SipStack()
     : m_masterProfile(std::make_shared<resip::MasterProfile>()),
@@ -50,4 +53,21 @@ void SipStack::startDUM() {
       boost::asio::detached);
 
   m_DUMThread = std::move(std::thread([this]() { m_IOContext.run(); }));
+}
+
+void SipStack::notify(const Command& cmd) {
+  const auto& sip_cmd = dynamic_cast<const SIPCommand&>(cmd);
+  std::cout << "Received SIP command: " << sip_cmd.type() << std::endl;
+  boost::asio::post(m_IOContext, [this]() {
+    resip::NameAddr target("sip:200@127.0.0.1:5062");
+    auto customProfile = std::make_shared<resip::UserProfile>();
+    customProfile->setUserAgent("ORange PBX/1.0");
+    customProfile->setDefaultFrom(resip::NameAddr("sip:100@127.0.0.1:5060"));
+    auto inviteSession = m_DUM.makeInviteSession(target, customProfile, nullptr);
+    m_DUM.send(inviteSession);
+  });
+}
+
+void SipStack::subscribe(CommandBus &bus) {
+  bus.subscribe(static_cast<size_t>(SIPCommandTypeEnum::SESSION_CREATE), shared_from_this());
 }

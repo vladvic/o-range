@@ -12,5 +12,6 @@ target_link_libraries(stack-test PUBLIC
 
 target_include_directories(sip_stack PUBLIC
   ${CMAKE_SOURCE_DIR}/include/SipStack
+  ${CMAKE_SOURCE_DIR}/include/S2B
   ${CMAKE_SOURCE_DIR}/include
 )

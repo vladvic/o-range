@@ -17,6 +17,7 @@ target_link_libraries(sip_stack PUBLIC
   resip
   rutil
   logger
+  s2b
 )
 
 target_include_directories(sip_stack PRIVATE
