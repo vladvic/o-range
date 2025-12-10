@@ -60,7 +60,7 @@ int main()
 {
   SimpleLogger logger;
   auto sub = std::make_shared<SimpleSubscriber>();
-  CommandBus bus;
+  MainCommandBus bus;
   bus.subscribe(PrintCommand::commandType, sub);
   for (int i = 0; i < 100; ++i)
   {

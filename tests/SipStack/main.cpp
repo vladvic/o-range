@@ -16,9 +16,9 @@ class SimpleLogger : public Logger::ILoggerImpl {
 int main() {
   try {
     SimpleLogger logger;
-    CommandBus bus;
+    MainCommandBus bus;
     auto stack = std::make_shared<SipStack>();
-    stack->subscribe(bus);
+    stack->subscribe(bus); // Can be replaced with CommandBus::instance().subscribe(...);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
     bus.publish(std::make_unique<SIPCommand>(SIPCommandTypeEnum::SESSION_CREATE));

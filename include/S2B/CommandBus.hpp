@@ -13,6 +13,7 @@
 #include <memory>
 #include <thread>
 #include <vector>
+#include <util/Singleton.hpp>
 
 #include "Command.hpp"
 
@@ -22,7 +23,24 @@ public:
   virtual void notify(const Command & cmd) = 0;
 };
 
+class CommandBusInterface
+{
+public:
+  virtual ~CommandBusInterface() = default;
+  virtual void subscribe(CommandType, std::shared_ptr<CommandBusSubscriber>) = 0;
+  virtual void publish(std::unique_ptr<Command> && cmd) = 0;
+};
+
 class CommandBus
+  : public CommandBusInterface
+  , public util::Singleton<CommandBusInterface>
+{
+public:
+  virtual ~CommandBus() = default;
+};
+
+class MainCommandBus
+  : public CommandBus
 {
   boost::asio::thread_pool m_ioct;
 #if BOOST_ASIO_VERSION < 103400
@@ -50,9 +68,9 @@ class CommandBus
   }
 
 public:
-  CommandBus();
-  ~CommandBus();
+  MainCommandBus();
+  ~MainCommandBus();
 
-  void subscribe(CommandType, std::shared_ptr<CommandBusSubscriber>);
-  void publish(std::unique_ptr<Command> && cmd);
+  void subscribe(CommandType, std::shared_ptr<CommandBusSubscriber>) override;
+  void publish(std::unique_ptr<Command> && cmd) override;
 };

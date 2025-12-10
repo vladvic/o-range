@@ -1,5 +1,5 @@
 /***************************************************
- * CommandBus.cpp
+ * MainCommandBus.cpp
  * Created on Sat, 22 Nov 2025 17:08:57 +0000 by vladimir
  *
  * $Author$
@@ -10,7 +10,7 @@
 #include "CommandBus.hpp"
 #include <Logger/Logger.hpp>
 
-CommandBus::CommandBus()
+MainCommandBus::MainCommandBus()
   : m_ioct(1)
 #if BOOST_ASIO_VERSION < 103400
   , m_workGuard(m_ioct)
@@ -20,7 +20,7 @@ CommandBus::CommandBus()
 {
 }
 
-CommandBus::~CommandBus()
+MainCommandBus::~MainCommandBus()
 {
   post( // Make sure all previous work is done before stop() is executed
     [this]() {
@@ -30,7 +30,7 @@ CommandBus::~CommandBus()
   m_ioct.wait();
 }
 
-void CommandBus::notifyAll(const Command & cmd)
+void MainCommandBus::notifyAll(const Command & cmd)
 {
   auto subscribers = m_subscribers.find(cmd.type());
   if (subscribers != m_subscribers.end())
@@ -45,7 +45,7 @@ void CommandBus::notifyAll(const Command & cmd)
   }
 }
 
-void CommandBus::subscribe(CommandType c, std::shared_ptr<CommandBusSubscriber> sub)
+void MainCommandBus::subscribe(CommandType c, std::shared_ptr<CommandBusSubscriber> sub)
 {
   post(
     [this, c, sub]() {
@@ -54,7 +54,7 @@ void CommandBus::subscribe(CommandType c, std::shared_ptr<CommandBusSubscriber> 
   );
 }
 
-void CommandBus::publish(std::unique_ptr<Command> && cmd)
+void MainCommandBus::publish(std::unique_ptr<Command> && cmd)
 {
   auto callback = 
     [this, cmd = std::move(cmd)]() mutable {
