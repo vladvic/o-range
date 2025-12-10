@@ -138,6 +138,25 @@ private:
     }
 };
 
+#ifdef LOG_TRACE
+# undef LOG_TRACE
+#endif
+#ifdef LOG_DEBUG
+# undef LOG_DEBUG
+#endif
+#ifdef LOG_INFO
+# undef LOG_INFO
+#endif
+#ifdef LOG_WARN
+# undef LOG_WARN
+#endif
+#ifdef LOG_ERROR
+# undef LOG_ERROR
+#endif
+#ifdef LOG_CRITICAL
+# undef LOG_CRITICAL
+#endif
+
 #define LOG_TRACE(...)    Logger::Log::trace(std::source_location::current(), __VA_ARGS__)
 #define LOG_DEBUG(...)    Logger::Log::debug(std::source_location::current(), __VA_ARGS__)
 #define LOG_INFO(...)     Logger::Log::info(std::source_location::current(), __VA_ARGS__)

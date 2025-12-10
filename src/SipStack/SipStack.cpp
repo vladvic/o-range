@@ -7,9 +7,11 @@
 #include <resip/dum/AppDialogSet.hxx>
 #include <resip/dum/AppDialog.hxx>
 #include <S2B/SIPCommand.hpp>
+#include <CustomLogger.hpp>
 
 SipStack::SipStack()
-    : m_masterProfile(std::make_shared<resip::MasterProfile>()),
+    : m_logger(std::make_unique<CustomLogger>()),
+      m_masterProfile(std::make_shared<resip::MasterProfile>()),
       m_pollGrp(resip::FdPollGrp::create()),
       m_intr(new resip::EventThreadInterruptor(*m_pollGrp)),
       m_stack(0, resip::DnsStub::EmptyNameserverList, m_intr, false, 0, 0,
@@ -25,6 +27,7 @@ SipStack::SipStack()
   m_DUM.setInviteSessionHandler(&m_sessionHandler);
 
   m_stackThread.run();
+  LOG_INFO("Sip stack created");
 
   startDUM();
 }

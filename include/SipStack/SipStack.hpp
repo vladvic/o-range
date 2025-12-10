@@ -1,9 +1,5 @@
 #pragma once
 
-#undef LOG_DEBUG
-#undef LOG_INFO
-
-#include <CustomLogger.hpp>
 #include <ORangeSessionHandler.hpp>
 #include <S2B/CommandBus.hpp>
 #include <boost/asio/io_context.hpp>
@@ -13,6 +9,8 @@
 #include <util/Singleton.hpp>
 #include <memory>
 #include <thread>
+
+class CustomLogger;
 
 namespace resip {
 class FdPollGrp;
@@ -32,7 +30,7 @@ class SipStack : public util::Singleton<SipStack>,
 
  private:
   void startDUM();
-  CustomLogger m_logger;
+  std::unique_ptr<CustomLogger> m_logger;
   std::shared_ptr<resip::MasterProfile> m_masterProfile;
   resip::FdPollGrp* m_pollGrp;
   resip::EventThreadInterruptor* m_intr;

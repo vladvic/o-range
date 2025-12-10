@@ -1,7 +1,7 @@
 #include <SipStack.hpp>
 #include <SIPCommand.hpp>
 #include <Media.hpp>
-
+#include <Logger/Logger.hpp>
 #include <thread>
 
 class SimpleLogger : public Logger::ILoggerImpl {
