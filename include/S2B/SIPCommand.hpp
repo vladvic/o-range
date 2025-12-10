@@ -13,10 +13,10 @@
 
 enum class SIPCommandTypeEnum : CommandType
 {
-  SESSION_CREATE = 1000,  // Incoming offer, outbound call request
-  SESSION_CREATED,        // Incoming offer, outbound call request
-  SESSION_ACCEPT,         // Accept session, or notification
-  SESSION_ACCEPTED,       // Accept session, or notification
+  SESSION_CREATE = -127, // Incoming offer, outbound call request
+  SESSION_CREATED,       // Incoming offer, outbound call request
+  SESSION_ACCEPT,        // Accept session, or notification
+  SESSION_ACCEPTED,      // Accept session, or notification
   SESSION_REJECT,
   SESSION_REJECTED,
   SESSION_MODIFY,

@@ -27,8 +27,14 @@ class CommandBusInterface
 {
 public:
   virtual ~CommandBusInterface() = default;
-  virtual void subscribe(CommandType, std::shared_ptr<CommandBusSubscriber>) = 0;
   virtual void publish(std::unique_ptr<Command> && cmd) = 0;
+  virtual void subscribe(CommandType, std::shared_ptr<CommandBusSubscriber>) = 0;
+
+  template<typename T>
+  void subscribe(T type, std::shared_ptr<CommandBusSubscriber> sub)
+  {
+    subscribe((CommandType)(type), sub);
+  }
 };
 
 class CommandBus
@@ -43,11 +49,7 @@ class MainCommandBus
   : public CommandBus
 {
   boost::asio::thread_pool m_ioct;
-#if BOOST_ASIO_VERSION < 103400
-  boost::asio::thread_pool::executor_type::work m_workGuard;
-#else
   boost::asio::executor_work_guard<boost::asio::thread_pool::executor_type> m_workGuard;
-#endif
 
   using SubscriberList = std::vector<std::weak_ptr<CommandBusSubscriber>>;
 
@@ -58,11 +60,7 @@ class MainCommandBus
   template<typename T>
   void post(T && callback)
   {
-#if BOOST_ASIO_VERSION < 103400
-    m_ioct.executor().post(
-#else
     boost::asio::post(m_ioct.executor(),
-#endif
       std::move(callback)
     );
   }

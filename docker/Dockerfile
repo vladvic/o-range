@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     libpopt-dev \
     libcppunit-dev \
     libncurses-dev \
+    libmagicenum-dev \
     libbenchmark-dev \
     sox \
     xxd \

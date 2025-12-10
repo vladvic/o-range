@@ -10,8 +10,9 @@
 
 #include <cstddef>
 #include <memory>
+#include <magic_enum.hpp>
 
-using CommandType = std::size_t;
+using CommandType = int8_t;
 
 class CompletionToken
 {
@@ -27,6 +28,12 @@ public:
   virtual ~Command() = default;
 
   virtual CommandType type() const = 0;
+
+  template<typename T>
+  bool hasEnumType() const
+  {
+    return magic_enum::enum_contains<T>(type());
+  }
 
   std::shared_ptr<CompletionToken> getCompletionToken() const;
   void setCompletionToken(std::shared_ptr<CompletionToken> t = std::make_shared<CompletionToken>());

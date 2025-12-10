@@ -27,9 +27,10 @@ SipStack::SipStack()
   m_DUM.setInviteSessionHandler(&m_sessionHandler);
 
   m_stackThread.run();
-  LOG_INFO("Sip stack created");
 
   startDUM();
+
+  CommandBus::instance().subscribe(static_cast<size_t>(SIPCommandTypeEnum::SESSION_CREATE), shared_from_this());
 }
 
 SipStack::~SipStack() {
@@ -69,8 +70,4 @@ void SipStack::notify(const Command& cmd) {
     auto inviteSession = m_DUM.makeInviteSession(target, customProfile, nullptr);
     m_DUM.send(inviteSession);
   });
-}
-
-void SipStack::subscribe(CommandBus &bus) {
-  bus.subscribe(static_cast<size_t>(SIPCommandTypeEnum::SESSION_CREATE), shared_from_this());
 }

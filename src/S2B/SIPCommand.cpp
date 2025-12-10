@@ -11,8 +11,6 @@
 #include "SIPCommand.hpp"
 #include "Media.hpp"
 
-static const CommandType cSIPCommandTypeBase = 1000;
-
 SIPCommand::SIPCommand(SIPCommandTypeEnum type)
   : m_type(type)
 {

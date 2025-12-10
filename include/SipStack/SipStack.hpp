@@ -26,7 +26,6 @@ class SipStack : public util::Singleton<SipStack>,
   ~SipStack();
   auto& getDUMIOContext() { return m_IOContext; }
   void notify(const Command& cmd) override;
-  void subscribe(CommandBus& bus);
 
  private:
   void startDUM();

@@ -9,12 +9,24 @@
 
 #include <memory>
 #include <iostream>
+#include <fstream>
 
 #include <S2B/Command.hpp>
 #include <S2B/CommandBus.hpp>
 #include <Logger/Logger.hpp>
 
 using namespace Logger;
+
+enum class PrintCommandType : CommandType
+{
+  PRINT_OUT_COMMAND = 100,
+  PRINT_ERR_COMMAND,
+};
+
+enum class WriteCommandType : CommandType
+{
+  SAVE_COMMAND = 20,
+};
 
 class SimpleLogger
     : public Logger::ILoggerImpl
@@ -31,17 +43,37 @@ class PrintCommand
   : public Command
 {
   std::string m_what;
+  CommandType m_type;
+
 public:
-  PrintCommand(const std::string &what)
+  PrintCommand(const std::string &what, PrintCommandType type = PrintCommandType::PRINT_OUT_COMMAND)
+    : m_what(what)
+    , m_type((CommandType)type)
+  { }
+
+  const std::string &what() const { return m_what; }
+
+  CommandType type() const
+  {
+    return m_type;
+  }
+};
+
+class WriteCommand
+  : public Command
+{
+  std::string m_what;
+
+public:
+  WriteCommand(const std::string &what)
     : m_what(what)
   { }
 
   const std::string &what() const { return m_what; }
 
-  static constexpr CommandType commandType = 100;
   CommandType type() const
   {
-    return commandType;
+    return (CommandType)WriteCommandType::SAVE_COMMAND;
   }
 };
 
@@ -51,8 +83,18 @@ class SimpleSubscriber
 public:
   void notify(const Command & cmd) override
   {
-    const auto &printCmd = dynamic_cast<const PrintCommand&>(cmd);
-    std::cout << printCmd.what() << std::endl;
+    //std::cout << magic_enum::enum_name<PrintCommandType>(cmd.type()) << std::endl;
+    if (cmd.hasEnumType<PrintCommandType>())
+    {
+      const auto &printCmd = dynamic_cast<const PrintCommand&>(cmd);
+      std::cout << printCmd.what() << std::endl;
+    }
+    else if (cmd.hasEnumType<WriteCommandType>())
+    {
+      const auto &writeCmd = dynamic_cast<const WriteCommand&>(cmd);
+      std::ofstream out("out.txt");
+      out << writeCmd.what() << std::endl;
+    }
   };
 };
 
@@ -60,10 +102,27 @@ int main()
 {
   SimpleLogger logger;
   auto sub = std::make_shared<SimpleSubscriber>();
-  MainCommandBus bus;
-  bus.subscribe(PrintCommand::commandType, sub);
-  for (int i = 0; i < 100; ++i)
   {
-    bus.publish(std::make_unique<PrintCommand>("Hello world "+std::to_string(i)+"!"));
+    MainCommandBus bus;
+    CommandBus::instance().subscribe(PrintCommandType::PRINT_OUT_COMMAND, sub);
+    CommandBus::instance().subscribe(PrintCommandType::PRINT_ERR_COMMAND, sub);
+    CommandBus::instance().subscribe(WriteCommandType::SAVE_COMMAND, sub);
+
+    for(auto type : magic_enum::enum_values<PrintCommandType>()){
+      std::cout << magic_enum::enum_name(type) << std::endl;
+    }
+
+    for (int i = 0; i < 10; ++i)
+    {
+      bus.publish(std::make_unique<PrintCommand>("Hello world "+std::to_string(i)+"!"));
+    }
+    for (int i = 0; i < 10; ++i)
+    {
+      bus.publish(std::make_unique<PrintCommand>("Hello world "+std::to_string(i)+"!", PrintCommandType::PRINT_ERR_COMMAND));
+    }
+    for (int i = 0; i < 10; ++i)
+    {
+      bus.publish(std::make_unique<WriteCommand>("Hello world "+std::to_string(i)+"!"));
+    }
   }
 }
