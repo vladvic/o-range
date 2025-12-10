@@ -3,12 +3,12 @@
 #include <ORangeSessionHandler.hpp>
 #include <S2B/CommandBus.hpp>
 #include <boost/asio/io_context.hpp>
+#include <memory>
 #include <resip/dum/MasterProfile.hxx>
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
-#include <util/Singleton.hpp>
-#include <memory>
 #include <thread>
+#include <util/Singleton.hpp>
 
 class CustomLogger;
 
@@ -26,6 +26,7 @@ class SipStack : public util::Singleton<SipStack>,
   ~SipStack();
   auto& getDUMIOContext() { return m_IOContext; }
   void notify(const Command& cmd) override;
+  void subscribe();
 
  private:
   void startDUM();

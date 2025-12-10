@@ -18,6 +18,7 @@ int main() {
     SimpleLogger logger;
     MainCommandBus bus;
     auto stack = std::make_shared<SipStack>();
+    stack->subscribe();
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
     bus.publish(std::make_unique<SIPCommand>(SIPCommandTypeEnum::SESSION_CREATE));

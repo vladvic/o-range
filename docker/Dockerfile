@@ -3,8 +3,11 @@ FROM ubuntu:24.04
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
+RUN apt update && apt install -y \
+    gcc-14 \
+    g++-14 \
+    gdb \
+    make \
     cmake \
     git \
     ninja-build \
@@ -28,7 +31,12 @@ RUN apt-get update && apt-get install -y \
     xxd \
     wget \
     sudo \
+    libc6-dev \
+    dpkg-dev \
     && rm -rf /var/lib/apt/lists/*
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 \
+    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100 \
+    && update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 100
 
 RUN userdel -r ubuntu && \
     groupadd -g ${GROUP_ID} developer 2>/dev/null || true && \

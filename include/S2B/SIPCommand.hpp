@@ -11,12 +11,13 @@
 #include <list>
 #include <memory>
 
-enum class SIPCommandTypeEnum : CommandType
-{
-  SESSION_CREATE = -127, // Incoming offer, outbound call request
-  SESSION_CREATED,       // Incoming offer, outbound call request
-  SESSION_ACCEPT,        // Accept session, or notification
-  SESSION_ACCEPTED,      // Accept session, or notification
+#include "Command.hpp"
+
+enum class SIPCommandTypeEnum : CommandType {
+  SESSION_CREATE = -127,  // Incoming offer, outbound call request
+  SESSION_CREATED,        // Incoming offer, outbound call request
+  SESSION_ACCEPT,         // Accept session, or notification
+  SESSION_ACCEPTED,       // Accept session, or notification
   SESSION_REJECT,
   SESSION_REJECTED,
   SESSION_MODIFY,
@@ -27,19 +28,16 @@ enum class SIPCommandTypeEnum : CommandType
 
 class MediaLine;
 
-class SIPCommand
-  : public Command
-{
+class SIPCommand : public Command {
   using MediaLinePtr = std::unique_ptr<MediaLine>;
 
-  SIPCommandTypeEnum      m_type;
+  SIPCommandTypeEnum m_type;
   std::list<MediaLinePtr> m_media;
 
-public:
+ public:
   SIPCommand(SIPCommandTypeEnum);
 
   CommandType type() const override;
-  std::list<MediaLinePtr> & media();
-  const std::list<MediaLinePtr> & media() const;
+  std::list<MediaLinePtr>& media();
+  const std::list<MediaLinePtr>& media() const;
 };
-

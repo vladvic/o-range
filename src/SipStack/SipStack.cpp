@@ -1,13 +1,11 @@
+#include <CustomLogger.hpp>
+#include <S2B/SIPCommand.hpp>
 #include <SipStack.hpp>
 #include <boost/asio.hpp>
 #include <resip/dum/DialogUsageManager.hxx>
 #include <resip/dum/InviteSessionHandler.hxx>
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
-#include <resip/dum/AppDialogSet.hxx>
-#include <resip/dum/AppDialog.hxx>
-#include <S2B/SIPCommand.hpp>
-#include <CustomLogger.hpp>
 
 SipStack::SipStack()
     : m_logger(std::make_unique<CustomLogger>()),
@@ -29,8 +27,6 @@ SipStack::SipStack()
   m_stackThread.run();
 
   startDUM();
-
-  CommandBus::instance().subscribe(static_cast<size_t>(SIPCommandTypeEnum::SESSION_CREATE), shared_from_this());
 }
 
 SipStack::~SipStack() {
@@ -67,7 +63,16 @@ void SipStack::notify(const Command& cmd) {
     auto customProfile = std::make_shared<resip::UserProfile>();
     customProfile->setUserAgent("ORange PBX/1.0");
     customProfile->setDefaultFrom(resip::NameAddr("sip:100@127.0.0.1:5060"));
-    auto inviteSession = m_DUM.makeInviteSession(target, customProfile, nullptr);
+    auto inviteSession =
+        m_DUM.makeInviteSession(target, customProfile, nullptr);
     m_DUM.send(inviteSession);
   });
+}
+
+void SipStack::subscribe() {
+  std::vector<size_t> subscriptions = {
+      static_cast<size_t>(SIPCommandTypeEnum::SESSION_CREATE),
+      static_cast<size_t>(SIPCommandTypeEnum::SESSION_ACCEPT)};
+
+  CommandBus::instance().subscripeSet(subscriptions, shared_from_this());
 }
