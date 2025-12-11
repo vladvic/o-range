@@ -6,17 +6,22 @@
 #include <resip/dum/InviteSessionHandler.hxx>
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
+extern "C" {
+#include <sys/eventfd.h>
+}
 
 SipStack::SipStack()
-    : m_logger(std::make_unique<CustomLogger>())
-    , m_masterProfile(std::make_shared<resip::MasterProfile>())
-    , m_pollGrp(resip::FdPollGrp::create())
-    , m_intr(new resip::EventThreadInterruptor(*m_pollGrp))
-    , m_stack(0, resip::DnsStub::EmptyNameserverList, m_intr, false, 0, 0,
-              m_pollGrp)
-    , m_DUM(m_stack)
-    , m_stackThread(m_stack, *m_intr, *m_pollGrp)
-{
+    : m_logger(std::make_unique<CustomLogger>()),
+      m_masterProfile(std::make_shared<resip::MasterProfile>()),
+      m_pollGrp(resip::FdPollGrp::create()),
+      m_intr(new resip::EventThreadInterruptor(*m_pollGrp)),
+      m_stack(0, resip::DnsStub::EmptyNameserverList, m_intr, false, 0, 0,
+              m_pollGrp),
+      m_DUM(m_stack),
+      m_stackEventFd(::eventfd(0, EFD_NONBLOCK | EFD_SEMAPHORE)),
+      m_stackThread(m_stack, *m_intr, *m_pollGrp, m_stackEventFd),
+      m_asio_eventFd(m_IOContext, m_stackEventFd),
+      m_timer(m_IOContext) {
   m_stack.addTransport(resip::UDP, 5060);
 
   m_masterProfile->addSupportedMethod(resip::INVITE);
@@ -40,20 +45,33 @@ SipStack::~SipStack() {
 }
 
 void SipStack::startDUM() {
-  boost::asio::co_spawn(
-      m_IOContext,
-      [this]() -> boost::asio::awaitable<void> {
-        boost::asio::steady_timer timer(
-            co_await boost::asio::this_coro::executor);
-        while (m_running) {
-          timer.expires_after(std::chrono::milliseconds(50));
-          co_await timer.async_wait(boost::asio::use_awaitable);
-          while (m_DUM.process());
-        }
-      },
-      boost::asio::detached);
+  m_timer.expires_after(std::chrono::milliseconds(50));
+  m_timer.async_wait(
+      [this](const boost::system::error_code& ec) { processDUMOnTimer(); });
+  m_asio_eventFd.async_wait(
+      boost::asio::posix::stream_descriptor::wait_read,
+      [this](const boost::system::error_code& ec) { processDUMOnEventFd(); });
 
   m_DUMThread = std::thread([this]() { m_IOContext.run(); });
+}
+
+void SipStack::processDUMOnEventFd() {
+  uint64_t u;
+  if (::read(m_stackEventFd, &u, sizeof(u)) <= 0) {
+    throw std::runtime_error("Something went wrong on reading event_fd");
+  }
+
+  while (m_DUM.process());
+  m_asio_eventFd.async_wait(
+      boost::asio::posix::stream_descriptor::wait_read,
+      [this](const boost::system::error_code& ec) { processDUMOnEventFd(); });
+}
+
+void SipStack::processDUMOnTimer() {
+  while (m_DUM.process());
+  m_timer.expires_after(std::chrono::milliseconds(50));
+  m_timer.async_wait(
+      [this](const boost::system::error_code& ec) { processDUMOnTimer(); });
 }
 
 void SipStack::notify(const Command& cmd) {
@@ -72,8 +90,7 @@ void SipStack::notify(const Command& cmd) {
 
 void SipStack::subscribe() {
   std::vector<SIPCommandTypeEnum> subscriptions = {
-      SIPCommandTypeEnum::SESSION_CREATE,
-      SIPCommandTypeEnum::SESSION_ACCEPT};
+      SIPCommandTypeEnum::SESSION_CREATE, SIPCommandTypeEnum::SESSION_ACCEPT};
 
   CommandBus::instance().subscribe(subscriptions, shared_from_this());
 }
