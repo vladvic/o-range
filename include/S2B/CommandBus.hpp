@@ -18,12 +18,11 @@
 #include "Command.hpp"
 
 template <typename T>
-concept ContainerType = requires(T t) {
+concept CommandTypeContainer = requires(T t) {
   std::begin(t);
   std::end(t);
-  { *std::begin(t) } -> std::convertible_to<CommandType>;
+  { static_cast<CommandType>(*std::begin(t)) } -> std::convertible_to<CommandType>;
 };
-
 
 class CommandBusSubscriber {
  public:
@@ -37,15 +36,19 @@ class CommandBusInterface {
   virtual void subscribe(CommandType,
                          std::shared_ptr<CommandBusSubscriber>) = 0;
 
-  template <typename T>
+  template<typename T> 
+  requires std::is_convertible_v<CommandType, 
+                                 decltype(static_cast<CommandType>(std::declval<T>()))>
   void subscribe(T type, std::shared_ptr<CommandBusSubscriber> sub) {
-    subscribe((CommandType)(type), sub);
+    subscribe(static_cast<CommandType>(type), sub);
   }
 
-  void subscripeSet(ContainerType auto& types,
-                    std::shared_ptr<CommandBusSubscriber> sub) {
+  template<CommandTypeContainer T>
+  void subscribe(const T& types,
+                    std::shared_ptr<CommandBusSubscriber> sub)
+  {
     for (auto t : types) {
-      subscribe((CommandType)(t), sub);
+      subscribe(t, sub);
     }
   }
 };

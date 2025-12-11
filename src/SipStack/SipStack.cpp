@@ -8,14 +8,15 @@
 #include <resip/stack/SipStack.hxx>
 
 SipStack::SipStack()
-    : m_logger(std::make_unique<CustomLogger>()),
-      m_masterProfile(std::make_shared<resip::MasterProfile>()),
-      m_pollGrp(resip::FdPollGrp::create()),
-      m_intr(new resip::EventThreadInterruptor(*m_pollGrp)),
-      m_stack(0, resip::DnsStub::EmptyNameserverList, m_intr, false, 0, 0,
-              m_pollGrp),
-      m_DUM(m_stack),
-      m_stackThread(m_stack, *m_intr, *m_pollGrp) {
+    : m_logger(std::make_unique<CustomLogger>())
+    , m_masterProfile(std::make_shared<resip::MasterProfile>())
+    , m_pollGrp(resip::FdPollGrp::create())
+    , m_intr(new resip::EventThreadInterruptor(*m_pollGrp))
+    , m_stack(0, resip::DnsStub::EmptyNameserverList, m_intr, false, 0, 0,
+              m_pollGrp)
+    , m_DUM(m_stack)
+    , m_stackThread(m_stack, *m_intr, *m_pollGrp)
+{
   m_stack.addTransport(resip::UDP, 5060);
 
   m_masterProfile->addSupportedMethod(resip::INVITE);
@@ -52,7 +53,7 @@ void SipStack::startDUM() {
       },
       boost::asio::detached);
 
-  m_DUMThread = std::move(std::thread([this]() { m_IOContext.run(); }));
+  m_DUMThread = std::thread([this]() { m_IOContext.run(); });
 }
 
 void SipStack::notify(const Command& cmd) {
@@ -70,9 +71,9 @@ void SipStack::notify(const Command& cmd) {
 }
 
 void SipStack::subscribe() {
-  std::vector<size_t> subscriptions = {
-      static_cast<size_t>(SIPCommandTypeEnum::SESSION_CREATE),
-      static_cast<size_t>(SIPCommandTypeEnum::SESSION_ACCEPT)};
+  std::vector<SIPCommandTypeEnum> subscriptions = {
+      SIPCommandTypeEnum::SESSION_CREATE,
+      SIPCommandTypeEnum::SESSION_ACCEPT};
 
-  CommandBus::instance().subscripeSet(subscriptions, shared_from_this());
+  CommandBus::instance().subscribe(subscriptions, shared_from_this());
 }
