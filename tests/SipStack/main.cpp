@@ -1,5 +1,5 @@
 #include <SipStack.hpp>
-#include <SIPCommand.hpp>
+#include <SignalCommand.hpp>
 #include <Media.hpp>
 #include <Logger/Logger.hpp>
 #include <thread>
@@ -21,7 +21,7 @@ int main() {
     stack->subscribe();
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    bus.publish(std::make_unique<SIPCommand>(SignalCommandType::CREATE));
+    bus.publish(std::make_unique<SignalCommand>(SignalCommandType::CREATE));
     std::cout << "Publish SIP command" << std::endl;
 
     // Keep the application running to process SIP messages

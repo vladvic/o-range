@@ -1,5 +1,5 @@
 #include <CustomLogger.hpp>
-#include <S2B/SIPCommand.hpp>
+#include <S2B/SignalCommand.hpp>
 #include <SipStack.hpp>
 #include <boost/asio.hpp>
 #include <resip/dum/DialogUsageManager.hxx>
@@ -75,7 +75,7 @@ void SipStack::processDUMOnTimer() {
 }
 
 void SipStack::notify(const Command& cmd) {
-  const auto& sip_cmd = dynamic_cast<const SIPCommand&>(cmd);
+  const auto& sip_cmd = dynamic_cast<const SignalCommand&>(cmd);
   std::cout << "Received SIP command: " << sip_cmd.type() << std::endl;
   boost::asio::post(m_IOContext, [this]() {
     resip::NameAddr target("sip:200@127.0.0.1:5062");

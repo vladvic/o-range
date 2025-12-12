@@ -1,5 +1,5 @@
 /***************************************************
- * SIPCommand.cpp
+ * SignalCommand.cpp
  * Created on Fri, 05 Dec 2025 12:09:55 +0000 by vladimir
  *
  * $Author$
@@ -8,30 +8,30 @@
  ***************************************************/
 
 #include "Command.hpp"
-#include "SIPCommand.hpp"
+#include "SignalCommand.hpp"
 #include "Media.hpp"
 
-SIPCommand::SIPCommand(SignalCommandType type)
+SignalCommand::SignalCommand(SignalCommandType type)
   : m_type((CommandType)type)
 {
 }
 
-SIPCommand::SIPCommand(SignalEventType type)
+SignalCommand::SignalCommand(SignalEventType type)
   : m_type((CommandType)type)
 {
 }
 
-CommandType SIPCommand::type() const
+CommandType SignalCommand::type() const
 {
   return (CommandType)m_type;
 }
 
-std::list<SIPCommand::MediaLinePtr> & SIPCommand::media()
+std::list<SignalCommand::MediaLinePtr> & SignalCommand::media()
 {
   return m_media;
 }
 
-const std::list<SIPCommand::MediaLinePtr> & SIPCommand::media() const
+const std::list<SignalCommand::MediaLinePtr> & SignalCommand::media() const
 {
   return m_media;
 }

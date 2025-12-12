@@ -35,15 +35,15 @@ enum class SignalEventType : CommandType {
 
 class MediaLine;
 
-class SIPCommand : public Command {
+class SignalCommand : public Command {
   using MediaLinePtr = std::unique_ptr<MediaLine>;
 
   CommandType m_type;
   std::list<MediaLinePtr> m_media;
 
  public:
-  SIPCommand(SignalCommandType);
-  SIPCommand(SignalEventType);
+  SignalCommand(SignalCommandType);
+  SignalCommand(SignalEventType);
 
   CommandType type() const override;
   std::list<MediaLinePtr>& media();
