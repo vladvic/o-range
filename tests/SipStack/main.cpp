@@ -21,7 +21,7 @@ int main() {
     stack->subscribe();
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    bus.publish(std::make_unique<SIPCommand>(SIPCommandTypeEnum::SESSION_CREATE));
+    bus.publish(std::make_unique<SIPCommand>(SignalCommandType::CREATE));
     std::cout << "Publish SIP command" << std::endl;
 
     // Keep the application running to process SIP messages

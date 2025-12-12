@@ -89,8 +89,8 @@ void SipStack::notify(const Command& cmd) {
 }
 
 void SipStack::subscribe() {
-  std::vector<SIPCommandTypeEnum> subscriptions = {
-      SIPCommandTypeEnum::SESSION_CREATE, SIPCommandTypeEnum::SESSION_ACCEPT};
+  std::vector<SignalCommandType> subscriptions = {
+      SignalCommandType::CREATE, SignalCommandType::ACCEPT};
 
   CommandBus::instance().subscribe(subscriptions, shared_from_this());
 }

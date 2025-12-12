@@ -11,8 +11,13 @@
 #include "SIPCommand.hpp"
 #include "Media.hpp"
 
-SIPCommand::SIPCommand(SIPCommandTypeEnum type)
-  : m_type(type)
+SIPCommand::SIPCommand(SignalCommandType type)
+  : m_type((CommandType)type)
+{
+}
+
+SIPCommand::SIPCommand(SignalEventType type)
+  : m_type((CommandType)type)
 {
 }
 
