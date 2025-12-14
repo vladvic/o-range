@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(O-Range)
 
 find_package(Boost REQUIRED)
-find_package(magic_enum CONFIG REQUIRED)
 
-get_target_property(INCLUDE_PATHS magic_enum::magic_enum INTERFACE_INCLUDE_DIRECTORIES)
-include_directories(${Boost_INCLUDE_DIRS} ${INCLUDE_PATHS} ${INCLUDE_PATHS}/magic_enum)
+include_directories(${Boost_INCLUDE_DIRS})
 
 set(CMAKE_CXX_STANDARD 23)
 

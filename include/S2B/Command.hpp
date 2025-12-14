@@ -10,9 +10,9 @@
 
 #include <cstddef>
 #include <memory>
-#include <magic_enum.hpp>
+#include <util/type_traits.hpp>
 
-using CommandType = int8_t;
+using CommandType = int16_t;
 
 class CompletionToken
 {
@@ -32,7 +32,7 @@ public:
   template<typename T>
   bool hasEnumType() const
   {
-    return magic_enum::enum_contains<T>(type());
+    return util::enum_traits<T>::has_value(type());
   }
 
   std::shared_ptr<CompletionToken> getCompletionToken() const;

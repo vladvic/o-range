@@ -8,7 +8,26 @@
  ***************************************************/
 
 #include <iostream>
+#include <tuple>
 #include <util/Settings.hpp>
+#include <util/type_traits.hpp>
+
+enum class Colors : short
+{
+  Red = 0,
+  Green = 4,
+  Blue = 7
+};
+
+enum State
+{
+  NOSTATE = -1,
+  START = 0,
+  TRANSFER_STARTED,
+  PROGRESS,
+  RINGING,
+  END
+};
 
 int main()
 {
@@ -43,4 +62,15 @@ int main()
         std::cout << "array[" << v.first << "]: " << (val.as<int>()) << std::endl;
       }
     });
+  using colors_traits = util::enum_traits<Colors>;
+  for (auto c = colors_traits::begin(); c != colors_traits::end(); ++c)
+  {
+    std::cout << "C: " << (int)*c << ": " << colors_traits::get_name(*c) << std::endl;
+  }
+  std::cout << "MIN: " << (int)colors_traits::min() << ": " << colors_traits::get_name(colors_traits::min()) << std::endl;
+  std::cout << "MAX: " << (int)colors_traits::max() << ": " << colors_traits::get_name(colors_traits::max()) << std::endl;
+  std::cout << (int)colors_traits::get_value(colors_traits::get_name(colors_traits::min())) << std::endl;
+  std::cout << colors_traits::has_value(10) << std::endl;
+  typedef std::tuple<Colors, State> MyType;
+  std::cout << util::type_reflection<MyType>::name << std::endl;
 }

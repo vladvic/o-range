@@ -14,6 +14,7 @@
 #include <S2B/Command.hpp>
 #include <S2B/CommandBus.hpp>
 #include <Logger/Logger.hpp>
+#include <util/type_traits.hpp>
 
 using namespace Logger;
 
@@ -83,7 +84,6 @@ class SimpleSubscriber
 public:
   void notify(const Command & cmd) override
   {
-    //std::cout << magic_enum::enum_name<PrintCommandType>(cmd.type()) << std::endl;
     if (cmd.hasEnumType<PrintCommandType>())
     {
       const auto &printCmd = dynamic_cast<const PrintCommand&>(cmd);
@@ -108,8 +108,10 @@ int main()
     CommandBus::instance().subscribe(PrintCommandType::PRINT_ERR_COMMAND, sub);
     CommandBus::instance().subscribe(WriteCommandType::SAVE_COMMAND, sub);
 
-    for(auto type : magic_enum::enum_values<PrintCommandType>()){
-      std::cout << magic_enum::enum_name(type) << std::endl;
+    using print_command_traits = util::enum_traits<PrintCommandType>;
+
+    for(const auto &type : std::ranges::subrange(print_command_traits::begin(), print_command_traits::end())){
+      std::cout << (int)type << ": " << print_command_traits::get_name(type) << std::endl;
     }
 
     for (int i = 0; i < 10; ++i)
