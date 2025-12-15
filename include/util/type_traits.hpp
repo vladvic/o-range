@@ -13,6 +13,7 @@
 #include <string_view>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 namespace util
 {
@@ -69,6 +70,7 @@ struct enum_traits
   static const std::string_view type_name;
   static const std::map<E, std::string_view> name;
   static const std::unordered_map<std::string_view, E> value;
+  static const std::vector<E> all;
   static E min() { return name.begin()->first; }
   static E max() { return name.rbegin()->first; }
   static const_iterator begin() { return const_iterator(name.begin()); }
@@ -126,10 +128,24 @@ auto get_enum_values()
 }
 
 template<typename E, E Min, E Max>
+auto get_all_values()
+{
+  std::vector<E> values;
+  auto &_name = enum_traits<E, Min, Max>::name;
+  for (auto s = _name.rbegin(); s != _name.rend(); ++s)
+  {
+    values.emplace(s->first);
+  }
+  return values;
+}
+
+template<typename E, E Min, E Max>
 const std::map<E, std::string_view> enum_traits<E, Min, Max>::name = get_enum_names<E, Min, Max>();
 template<typename E, E Min, E Max>
 const std::unordered_map<std::string_view, E> enum_traits<E, Min, Max>::value = get_enum_values<E, Min, Max>();
 template<typename E, E Min, E Max>
 const std::string_view enum_traits<E, Min, Max>::type_name = type_reflection<E>::name;
+template<typename E, E Min, E Max>
+const std::vector<E> enum_traits<E, Min, Max>::all = get_all_values<E, Min, Max>();
 
 } // namespace util

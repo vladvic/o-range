@@ -24,34 +24,37 @@ class FdPollGrp;
 
 class CommandBus;
 
-class CustomEventStackThread : public resip::EventStackThread {
- public:
+class CustomEventStackThread
+  : public resip::EventStackThread
+{
+public:
   CustomEventStackThread(resip::SipStack& stack,
-                         resip::EventThreadInterruptor& si,
-                         resip::FdPollGrp& pollGrp, int eventFd)
-      : resip::EventStackThread(stack, si, pollGrp), m_eventFd(eventFd) {}
+      resip::EventThreadInterruptor& si,
+      resip::FdPollGrp& pollGrp, int eventFd)
+    : resip::EventStackThread(stack, si, pollGrp), m_eventFd(eventFd) {}
 
- protected:
+protected:
   virtual void afterProcess() override {
     uint64_t u = 1;
     ::write(m_eventFd, &u, sizeof(u));
   }
 
- private:
+private:
   int m_eventFd;
 };
 
 class SipStack : public util::Singleton<SipStack>,
                  public CommandBusSubscriber,
-                 public std::enable_shared_from_this<SipStack> {
- public:
+                 public std::enable_shared_from_this<SipStack>
+{
+public:
   SipStack();
   ~SipStack();
   auto& getDUMIOContext() { return m_IOContext; }
   void notify(const Command& cmd) override;
-  void subscribe();
+  void init();
 
- private:
+private:
   void startDUM();
   void processDUMOnTimer();
   void processDUMOnEventFd();
