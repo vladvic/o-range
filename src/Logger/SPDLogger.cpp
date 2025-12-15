@@ -22,8 +22,7 @@ namespace Logger
 static constexpr inline spdlog::level::level_enum to_spd(LogLevel l)
 {
   using L = LogLevel;
-  switch (l)
-  {
+  switch (l) {
     case L::trace:    return spdlog::level::trace;
     case L::debug:    return spdlog::level::debug;
     case L::info:     return spdlog::level::info;
@@ -37,8 +36,7 @@ static constexpr inline spdlog::level::level_enum to_spd(LogLevel l)
 static constexpr inline LogLevel from_spd(spdlog::level::level_enum l)
 {
   using L = LogLevel;
-  switch (l)
-  {
+  switch (l) {
     case spdlog::level::trace:    return L::trace;
     case spdlog::level::debug:    return L::debug;
     case spdlog::level::info:     return L::info;
@@ -51,9 +49,9 @@ static constexpr inline LogLevel from_spd(spdlog::level::level_enum l)
 
 SPDLogger::SPDLogger()
   : m_logLevel({
-    {SinkType::Default, spdlog::level::info},
-    {SinkType::Console, spdlog::level::info},
-    {SinkType::PCAP,    spdlog::level::debug},
+      {SinkType::Default, spdlog::level::info},
+      {SinkType::Console, spdlog::level::info},
+      {SinkType::PCAP,    spdlog::level::debug},
     })
   , m_fileName(DEFAULT_LOG_FILE)
 {
@@ -73,8 +71,7 @@ void SPDLogger::createDefaultLoggers()
   auto&                                 mutex = registry_inst.tp_mutex();
   std::lock_guard<std::recursive_mutex> tp_lock(mutex);
   auto                                  tp = registry_inst.get_tp();
-  if (tp == nullptr)
-  {
+  if (tp == nullptr) {
     tp = std::make_shared<spdlog::details::thread_pool>(spdlog::details::default_async_q_size, 1U);
     registry_inst.set_tp(tp);
   }
@@ -90,17 +87,17 @@ void SPDLogger::createDefaultLoggers()
   auto stdout_sink           = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   m_sinks[SinkType::Console] = std::make_shared<spdlog::async_logger>("console", stdout_sink, spdlog::thread_pool());
   m_sinks[SinkType::Console]->set_level(m_logLevel[SinkType::Console]);
-  m_sinks[SinkType::Console]->enable_backtrace(16);
 
   m_sinks[SinkType::Default]->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] %v");
   m_sinks[SinkType::Console]->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] %v");
+
+  spdlog::set_default_logger(m_sinks[SinkType::Console]);
 }
 
 void SPDLogger::setFileName(const std::filesystem::path &name)
 {
   auto it = m_sinks.find(SinkType::Default);
-  if (it == m_sinks.end() || !it->second)
-  {
+  if (it == m_sinks.end() || !it->second) {
     return;
   }
 
@@ -125,8 +122,7 @@ void SPDLogger::setLogLevel(SinkType _sink, LogLevel lvl)
   m_logLevel[_sink] = level;
 
   auto it = m_sinks.find(_sink);
-  if (it == m_sinks.end() || !it->second)
-  {
+  if (it == m_sinks.end() || !it->second) {
     return;
   }
 
@@ -141,8 +137,7 @@ void SPDLogger::setLogLevel(SinkType _sink, LogLevel lvl)
 void SPDLogger::emit_message(LogLevel lvl, SinkType _sink, std::string_view msg, const SourceLocation &loc)
 {
   auto it = m_sinks.find(_sink);
-  if (it == m_sinks.end() || !it->second)
-  {
+  if (it == m_sinks.end() || !it->second) {
     return;
   }
 
@@ -153,12 +148,17 @@ void SPDLogger::emit_message(LogLevel lvl, SinkType _sink, std::string_view msg,
 
 void SPDLogger::flush()
 {
-  for (auto& sink : m_sinks)
-  {
-    if (sink.second)
-    {
+  for (auto& sink : m_sinks) {
+    if (sink.second) {
       sink.second->flush();
     }
+  }
+  auto& registry_inst = spdlog::details::registry::instance();
+  auto&         mutex = registry_inst.tp_mutex();
+  std::lock_guard<std::recursive_mutex> tp_lock(mutex);
+  auto                                  tp = registry_inst.get_tp();
+  if (tp) {
+    while(tp->queue_size());
   }
 }
 
