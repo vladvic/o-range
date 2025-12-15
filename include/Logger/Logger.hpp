@@ -34,7 +34,10 @@ enum class LogLevel
 enum class SinkType
 {
   Default,
-  Console
+  Console,
+  PCAP,
+  Custom1,
+  Custom2
 };
 
 class Log;
@@ -75,7 +78,12 @@ class LogEmitter
 {
   public:
     LogEmitter(ILoggerImpl& lg, LogLevel lvl, std::string msg, const SourceLocation &loc);
-    LogEmitter& show();
+    LogEmitter& show(SinkType type = SinkType::Console);
+    template<typename... S>
+    void show(S... s)
+    {
+      (show(s),...);
+    }
 
   private:
     ILoggerImpl&         m_logger;

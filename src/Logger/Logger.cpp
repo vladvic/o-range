@@ -33,9 +33,9 @@ LogEmitter::LogEmitter(ILoggerImpl& lg, LogLevel lvl, std::string msg, const Sou
   m_logger.emit_message(m_level, SinkType::Default, m_msg, m_location);
 }
 
-LogEmitter& LogEmitter::show()
+LogEmitter& LogEmitter::show(SinkType type)
 {
-  m_logger.emit_message(m_level, SinkType::Console, m_msg, m_location);
+  m_logger.emit_message(m_level, type, m_msg, m_location);
   return *this;
 }
 

@@ -87,6 +87,8 @@ RUN cd /tmp && \
     cd .. && \
     rm -rf sipp
 
+RUN apt-get install spdlog-devel
+
 USER developer
 WORKDIR /home/developer
 
