@@ -13,8 +13,7 @@ std::string Number::normalizeNumber(std::string s)
 {
   size_t pos;
 
-  while((pos = s.find_first_of("- .")) != std::string::npos)
-  {
+  while ((pos = s.find_first_of("- .")) != std::string::npos) {
     s.replace(pos, 1, "");
   }
   return s;

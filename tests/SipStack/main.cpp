@@ -1,19 +1,23 @@
-#include <SipStack.hpp>
-#include <SignalCommand.hpp>
-#include <Media.hpp>
 #include <Logger/Logger.hpp>
+#include <Media.hpp>
+#include <SignalCommand.hpp>
+#include <SipStack.hpp>
 #include <thread>
 
-class SimpleLogger : public Logger::ILoggerImpl {
- public:
-  void emit_message(Logger::LogLevel lvl, Logger::SinkType sink,
+class SimpleLogger : public Logger::ILoggerImpl
+{
+public:
+  void emit_message(Logger::LogLevel lvl,
+                    Logger::SinkType sink,
                     std::string_view msg,
-                    const Logger::SourceLocation& loc) override {
+                    const Logger::SourceLocation& loc) override
+  {
     std::cerr << msg << std::endl;
   }
 };
 
-int main() {
+int main()
+{
   try {
     SimpleLogger logger;
     MainCommandBus bus;
@@ -28,7 +32,8 @@ int main() {
     while (true) {
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }

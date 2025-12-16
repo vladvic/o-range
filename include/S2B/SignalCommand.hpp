@@ -13,9 +13,10 @@
 
 #include "Command.hpp"
 
-enum class SignalCommandType : CommandType {
-  CREATE = -127,  // Incoming offer, outbound call request
-  ACCEPT,         // Accept session, or notification
+enum class SignalCommandType : CommandType
+{
+  CREATE = -127, // Incoming offer, outbound call request
+  ACCEPT,        // Accept session, or notification
   PROGRESS,
   RINGING,
   REJECT,
@@ -23,9 +24,10 @@ enum class SignalCommandType : CommandType {
   TERMINATE
 };
 
-enum class SignalEventType : CommandType {
-  CREATED = -117,  // Incoming offer, outbound call request
-  ACCEPTED,        // Accept session, or notification
+enum class SignalEventType : CommandType
+{
+  CREATED = -117, // Incoming offer, outbound call request
+  ACCEPTED,       // Accept session, or notification
   PROGRESS,
   RINGING,
   REJECTED,
@@ -35,17 +37,24 @@ enum class SignalEventType : CommandType {
 
 class MediaLine;
 
-class SignalCommand : public Command {
-  using MediaLinePtr = std::unique_ptr<MediaLine>;
+class SignalCommand : public Command
+{
+  using MediaLinePtr = std::shared_ptr<MediaLine>;
 
   CommandType m_type;
   std::list<MediaLinePtr> m_media;
+  std::string m_source;
+  std::string m_destination;
 
- public:
+public:
   SignalCommand(SignalCommandType);
   SignalCommand(SignalEventType);
 
   CommandType type() const override;
   std::list<MediaLinePtr>& media();
   const std::list<MediaLinePtr>& media() const;
+  std::string& source();
+  const std::string& source() const;
+  std::string& destination();
+  const std::string& destination() const;
 };

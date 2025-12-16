@@ -11,37 +11,35 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <string>
 
 class ObjectArena;
 
 class ArenaLocatorInterface
 {
   friend class ObjectArena;
-  static ArenaLocatorInterface *m_instance;
+  static ArenaLocatorInterface* m_instance;
 
-  virtual void addArena(const std::string&, std::shared_ptr<ObjectArena>&) = 0;
-  virtual void removeArena(const std::string&) = 0;
-  virtual std::shared_ptr<ObjectArena> locateArena(const std::string&) = 0;
+  virtual void addArena(intptr_t, std::shared_ptr<ObjectArena>&) = 0;
+  virtual void removeArena(intptr_t) = 0;
+  virtual std::shared_ptr<ObjectArena> locateArena(intptr_t) = 0;
 
-  static void add(const std::string&, std::shared_ptr<ObjectArena>);
-  static void remove(const std::string&);
+  static void add(intptr_t, std::shared_ptr<ObjectArena>);
+  static void remove(intptr_t);
 
 public:
   ArenaLocatorInterface();
   virtual ~ArenaLocatorInterface();
 
-  static std::shared_ptr<ObjectArena> locate(const std::string&);
+  static std::shared_ptr<ObjectArena> locate(intptr_t);
 };
 
-class ArenaLocatorImpl
-  : public ArenaLocatorInterface
+class ArenaLocatorImpl : public ArenaLocatorInterface
 {
-  std::map<std::string, std::shared_ptr<ObjectArena>> m_arenas;
+  std::map<intptr_t, std::shared_ptr<ObjectArena>> m_arenas;
 
-  void addArena(const std::string& s, std::shared_ptr<ObjectArena>& a) override;
-  void removeArena(const std::string& s) override;
-  std::shared_ptr<ObjectArena> locateArena(const std::string& s) override;
+  void addArena(intptr_t s, std::shared_ptr<ObjectArena>& a) override;
+  void removeArena(intptr_t s) override;
+  std::shared_ptr<ObjectArena> locateArena(intptr_t s) override;
 };
 
 #ifndef MOCK_ARENA_LOCATOR

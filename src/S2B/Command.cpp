@@ -12,17 +12,17 @@
 
 #include <Command.hpp>
 
-bool CompletionToken::operator==(const CompletionToken &other)
+bool CompletionTokenTag::operator==(const CompletionTokenTag& other)
 {
   return &other == this;
 }
 
-std::shared_ptr<CompletionToken> Command::getCompletionToken() const
+CompletionToken Command::getCompletionToken() const
 {
   return m_completionToken;
 }
 
-void Command::setCompletionToken(std::shared_ptr<CompletionToken> t)
+void Command::setCompletionToken(CompletionToken t)
 {
   m_completionToken = t;
 }

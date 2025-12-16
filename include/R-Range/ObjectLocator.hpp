@@ -12,7 +12,7 @@ template<typename T>
 class ObjectLocatorInterface
 {
   friend class T;
-  static ObjectLocatorInterface *m_instance;
+  static ObjectLocatorInterface* m_instance;
 
   virtual void addArena(const std::string&, std::shared_ptr<T>) = 0;
   virtual void removeArena(const std::string&) = 0;
@@ -29,4 +29,4 @@ public:
 };
 
 template<typename T>
-static ObjectLocatorInterface *ObjectLocatorInterface<T>::m_instance = nullptr;
+static ObjectLocatorInterface* ObjectLocatorInterface<T>::m_instance = nullptr;

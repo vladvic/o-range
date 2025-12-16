@@ -8,22 +8,30 @@
  ***************************************************/
 #pragma once
 
-#include <string>
-#include "Object.hpp"
 #include "Device.hpp"
+#include "Object.hpp"
+#include <string>
 
-class Session
-  : public Object
+class Leg;
+
+class SessionId
 {
-  std::string m_id;
+public:
+  virtual ~SessionId() = default;
+  virtual intptr_t hash() const = 0;
+};
+
+class Session : public Object
+{
+  std::unique_ptr<SessionId> m_id;
   std::weak_ptr<Device> m_device;
+  std::weak_ptr<Leg> m_leg;
 
 public:
-  Session(const std::string& id, std::shared_ptr<Device> device = {});
+  Session(std::unique_ptr<SessionId>&& id, std::shared_ptr<Device> device = {});
   ~Session();
 
-  inline
-  std::string id() { return m_id; }
-  inline
-  std::shared_ptr<Device> device() { return m_device.lock(); }
+  inline const SessionId& id() const { return *m_id; }
+  inline std::shared_ptr<Device> device() { return m_device.lock(); }
+  inline std::shared_ptr<Leg> leg() { return m_leg.lock(); }
 };

@@ -9,3 +9,18 @@
 
 #include "Call.hpp"
 
+std::shared_ptr<Call> Call::fromLeg(std::shared_ptr<Leg> leg)
+{
+  m_fromLeg = leg;
+  return std::dynamic_pointer_cast<Call>(shared_from_this());
+};
+
+std::shared_ptr<Leg> Call::leg()
+{
+  auto leg = std::get<0>(m_legs).lock();
+  if (leg == m_fromLeg) {
+    leg = std::get<1>(m_legs).lock();
+  }
+  m_fromLeg.reset();
+  return leg;
+}

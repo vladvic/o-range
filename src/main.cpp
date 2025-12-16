@@ -7,20 +7,24 @@
  * $Date$
  ***************************************************/
 
-#include <S2B/SignalCommand.hpp>
-#include <S2B/Media.hpp>
-#include <SipStack/SipStack.hpp>
-#include <R-Range/LogicLayer.hpp>
-#include <Logger/SPDLogger.hpp>
 #include <Logger/ExceptionHandler.hpp>
+#include <Logger/SPDLogger.hpp>
+#include <R-Range/LogicLayer.hpp>
+#include <S2B/Media.hpp>
+#include <S2B/SignalCommand.hpp>
+#include <SipStack/SipStack.hpp>
 #include <thread>
 
-int main(int argc, char **argv) {
-  ExceptionHandler exceptionHandler;
-  SPDLogger        logger;
-  MainCommandBus   bus;
+int main(int argc, char** argv)
+{
+  Logger::ExceptionHandler exceptionHandler;
+  Logger::SPDLogger logger;
+  MainCommandBus bus;
 
   auto stack = std::make_shared<SipStack>();
   auto logic = std::make_shared<LogicLayer>();
   logic->init();
+  stack->init();
+
+  logic->run();
 }

@@ -12,4 +12,3 @@ class MediaLine
 {
   /* TODO: fill in media parameters */
 };
-

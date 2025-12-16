@@ -7,8 +7,8 @@
  * $Date$
  ***************************************************/
 
-#include "Command.hpp"
 #include "SignalCommand.hpp"
+#include "Command.hpp"
 #include "Media.hpp"
 
 SignalCommand::SignalCommand(SignalCommandType type)
@@ -26,13 +26,32 @@ CommandType SignalCommand::type() const
   return (CommandType)m_type;
 }
 
-std::list<SignalCommand::MediaLinePtr> & SignalCommand::media()
+std::list<SignalCommand::MediaLinePtr>& SignalCommand::media()
 {
   return m_media;
 }
 
-const std::list<SignalCommand::MediaLinePtr> & SignalCommand::media() const
+const std::list<SignalCommand::MediaLinePtr>& SignalCommand::media() const
 {
   return m_media;
 }
 
+std::string& SignalCommand::destination()
+{
+  return m_destination;
+}
+
+const std::string& SignalCommand::destination() const
+{
+  return m_destination;
+}
+
+std::string& SignalCommand::source()
+{
+  return m_destination;
+}
+
+const std::string& SignalCommand::source() const
+{
+  return m_destination;
+}

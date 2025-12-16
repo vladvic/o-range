@@ -13,12 +13,11 @@
 
 #include <vector>
 
-namespace Logger
-{
+namespace Logger {
 
 class ExceptionHandler
 {
-  std::vector<int>              m_signals;
+  std::vector<int> m_signals;
   std::vector<struct sigaction> m_oldActions;
 
   static void signalHandler(int sig, siginfo_t* si, void* unused);

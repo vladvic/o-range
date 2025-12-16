@@ -8,12 +8,11 @@
  ***************************************************/
 #pragma once
 
-#include <string>
-#include "Object.hpp"
 #include "Number.hpp"
+#include "Object.hpp"
+#include <string>
 
-class Device
-  : public Object
+class Device : public Object
 {
   std::string m_id;
   std::weak_ptr<Number> m_number;
@@ -22,6 +21,5 @@ public:
   Device(const std::string& id, std::shared_ptr<Number> number = {});
   ~Device();
 
-  inline
-  std::shared_ptr<Number> number() { return m_number.lock(); }
+  inline std::shared_ptr<Number> number() { return m_number.lock(); }
 };

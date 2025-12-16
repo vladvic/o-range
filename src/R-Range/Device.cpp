@@ -7,9 +7,9 @@
  * $Date$
  ***************************************************/
 
-#include <iostream>
-#include <Logger/Logger.hpp>
 #include "Device.hpp"
+#include <Logger/Logger.hpp>
+#include <iostream>
 
 Device::Device(const std::string& id, std::shared_ptr<Number> number)
   : m_id(id)

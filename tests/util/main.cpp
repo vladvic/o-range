@@ -53,23 +53,30 @@ int main()
   std::cout << "valueD: " << settings["valueD"].as<int>() << std::endl;
   std::cout << "valueE: " << settings["valueE"].as<unsigned int>() << std::endl;
   std::cout << "valueF: " << settings["valueF"].as<float>() << std::endl;
-  std::cout << "valueG: " << settings["Section1"]["valueG"].as<int>() << std::endl;
+  std::cout << "valueG: " << settings["Section1"]["valueG"].as<int>()
+            << std::endl;
   settings["Section1"]["array"].forEach(
-    [](auto &v) {
+    [](auto& v)
+    {
       using T = std::decay_t<decltype(v)>;
       if constexpr (util::is_pair_v<T>) {
-        util::SettingsValue &val = v.second;
-        std::cout << "array[" << v.first << "]: " << (val.as<int>()) << std::endl;
+        util::SettingsValue& val = v.second;
+        std::cout << "array[" << v.first << "]: " << (val.as<int>())
+                  << std::endl;
       }
     });
   using colors_traits = util::enum_traits<Colors>;
-  for (auto c = colors_traits::begin(); c != colors_traits::end(); ++c)
-  {
-    std::cout << "C: " << (int)*c << ": " << colors_traits::get_name(*c) << std::endl;
+  for (auto c = colors_traits::begin(); c != colors_traits::end(); ++c) {
+    std::cout << "C: " << (int)*c << ": " << colors_traits::get_name(*c)
+              << std::endl;
   }
-  std::cout << "MIN: " << (int)colors_traits::min() << ": " << colors_traits::get_name(colors_traits::min()) << std::endl;
-  std::cout << "MAX: " << (int)colors_traits::max() << ": " << colors_traits::get_name(colors_traits::max()) << std::endl;
-  std::cout << (int)colors_traits::get_value(colors_traits::get_name(colors_traits::min())) << std::endl;
+  std::cout << "MIN: " << (int)colors_traits::min() << ": "
+            << colors_traits::get_name(colors_traits::min()) << std::endl;
+  std::cout << "MAX: " << (int)colors_traits::max() << ": "
+            << colors_traits::get_name(colors_traits::max()) << std::endl;
+  std::cout << (int)colors_traits::get_value(
+                 colors_traits::get_name(colors_traits::min()))
+            << std::endl;
   std::cout << colors_traits::has_value(10) << std::endl;
   typedef std::tuple<Colors, State> MyType;
   std::cout << util::type_reflection<MyType>::name << std::endl;

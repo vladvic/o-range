@@ -9,8 +9,19 @@
 #pragma once
 
 #include "Object.hpp"
+#include <tuple>
 
-class Call
-  : public Object
+class Leg;
+
+class Call : public Object
 {
+  friend class Leg;
+
+  std::tuple<std::weak_ptr<Leg>, std::weak_ptr<Leg>> m_legs;
+  std::shared_ptr<Leg> m_fromLeg;
+
+  std::shared_ptr<Call> fromLeg(std::shared_ptr<Leg> leg);
+
+public:
+  std::shared_ptr<Leg> leg();
 };

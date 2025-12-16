@@ -11,42 +11,38 @@
 #include <format>
 #include <stdexcept>
 
-namespace util
-{
+namespace util {
 
 template<typename T>
 class Singleton
 {
-  static Singleton * s_instance;
+  static Singleton* s_instance;
 
 public:
   Singleton()
   {
-    if (s_instance)
-    {
-      throw std::runtime_error(std::format("Singleton of type {} already exists!", typeid(T).name()));
+    if (s_instance) {
+      throw std::runtime_error(
+        std::format("Singleton of type {} already exists!", typeid(T).name()));
     }
 
     s_instance = this;
   }
-  
-  virtual ~Singleton()
+
+  virtual ~Singleton() { s_instance = nullptr; }
+
+  static T& instance()
   {
-    s_instance = nullptr;
-  }
-  
-  static T & instance()
-  {
-    if (!s_instance)
-    {
-      throw std::runtime_error(std::format("Singleton of type {} does not exist!", typeid(T).name()));
+    if (!s_instance) {
+      throw std::runtime_error(
+        std::format("Singleton of type {} does not exist!", typeid(T).name()));
     }
 
-    return dynamic_cast<T &>(*s_instance);
+    return dynamic_cast<T&>(*s_instance);
   }
 };
 
 template<typename T>
-Singleton<T> * Singleton<T>::s_instance = nullptr;
+Singleton<T>* Singleton<T>::s_instance = nullptr;
 
 }

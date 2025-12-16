@@ -10,7 +10,16 @@
 
 #include "Object.hpp"
 
-class Leg
-  : public Object
+class Session;
+class Call;
+
+class Leg : public Object
 {
+  std::weak_ptr<Session> m_session;
+  std::weak_ptr<Call> m_call;
+
+public:
+  Leg();
+  inline std::shared_ptr<Session> session() { return m_session.lock(); }
+  std::shared_ptr<Call> call();
 };

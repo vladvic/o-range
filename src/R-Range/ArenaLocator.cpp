@@ -7,12 +7,11 @@
  * $Date$
  ***************************************************/
 
+#include "ArenaLocator.hpp"
 #include <cassert>
 #include <string>
-#include <string>
-#include "ArenaLocator.hpp"
 
-ArenaLocatorInterface *ArenaLocatorInterface::m_instance = nullptr;
+ArenaLocatorInterface* ArenaLocatorInterface::m_instance = nullptr;
 
 ArenaLocatorInterface::ArenaLocatorInterface()
 {
@@ -25,39 +24,38 @@ ArenaLocatorInterface::~ArenaLocatorInterface()
   m_instance = nullptr;
 }
 
-void ArenaLocatorInterface::add(const std::string& s, std::shared_ptr<ObjectArena> a)
+void ArenaLocatorInterface::add(intptr_t s, std::shared_ptr<ObjectArena> a)
 {
   assert(m_instance);
   m_instance->addArena(s, a);
 }
 
-void ArenaLocatorInterface::remove(const std::string& s)
+void ArenaLocatorInterface::remove(intptr_t s)
 {
   assert(m_instance);
   m_instance->removeArena(s);
 }
 
-std::shared_ptr<ObjectArena> ArenaLocatorInterface::locate(const std::string& s)
+std::shared_ptr<ObjectArena> ArenaLocatorInterface::locate(intptr_t s)
 {
   assert(m_instance);
   return m_instance->locateArena(s);
 }
 
-void ArenaLocatorImpl::addArena(const std::string& s, std::shared_ptr<ObjectArena>& a)
+void ArenaLocatorImpl::addArena(intptr_t s, std::shared_ptr<ObjectArena>& a)
 {
   m_arenas.emplace(s, a);
 }
 
-void ArenaLocatorImpl::removeArena(const std::string& s)
+void ArenaLocatorImpl::removeArena(intptr_t s)
 {
-  m_arenas.erase(std::string(s));
+  m_arenas.erase(s);
 }
 
-std::shared_ptr<ObjectArena> ArenaLocatorImpl::locateArena(const std::string& s)
+std::shared_ptr<ObjectArena> ArenaLocatorImpl::locateArena(intptr_t s)
 {
-  if (m_arenas.find(std::string(s)) != m_arenas.end())
-  {
-    return m_arenas.at(std::string(s));
+  if (m_arenas.find(s) != m_arenas.end()) {
+    return m_arenas.at(s);
   }
   return {};
 }

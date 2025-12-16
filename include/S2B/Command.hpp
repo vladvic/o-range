@@ -14,15 +14,17 @@
 
 using CommandType = int16_t;
 
-class CompletionToken
+class CompletionTokenTag
 {
 public:
-  bool operator==(const CompletionToken &);
+  bool operator==(const CompletionTokenTag&);
 };
+
+using CompletionToken = std::shared_ptr<CompletionTokenTag>;
 
 class Command
 {
-  std::shared_ptr<CompletionToken> m_completionToken;
+  CompletionToken m_completionToken;
 
 public:
   virtual ~Command() = default;
@@ -35,7 +37,7 @@ public:
     return util::enum_traits<T>::has_value(type());
   }
 
-  std::shared_ptr<CompletionToken> getCompletionToken() const;
-  void setCompletionToken(std::shared_ptr<CompletionToken> t = std::make_shared<CompletionToken>());
+  CompletionToken getCompletionToken() const;
+  void setCompletionToken(
+    CompletionToken t = std::make_shared<CompletionTokenTag>());
 };
-

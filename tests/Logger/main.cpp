@@ -7,13 +7,13 @@
  * $Date$
  ***************************************************/
 
-#include <memory>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
 
+#include <Logger/ExceptionHandler.hpp>
 #include <Logger/Logger.hpp>
 #include <Logger/SPDLogger.hpp>
-#include <Logger/ExceptionHandler.hpp>
 
 using namespace Logger;
 
@@ -28,6 +28,6 @@ int main()
   LOG_ERROR("Error log message").show();
   Logger::Log::flush();
 
-  int *p = NULL;
+  int* p = NULL;
   *p = 10;
 }

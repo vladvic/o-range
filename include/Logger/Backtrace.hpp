@@ -8,8 +8,7 @@
  ***************************************************/
 #pragma once
 
-namespace Logger
-{
+namespace Logger {
 
 void printBacktrace(int levels);
 

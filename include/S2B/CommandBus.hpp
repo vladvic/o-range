@@ -17,35 +17,40 @@
 
 #include "Command.hpp"
 
-template <typename T>
+template<typename T>
 concept CommandTypeContainer = requires(T t) {
   std::begin(t);
   std::end(t);
-  { static_cast<CommandType>(*std::begin(t)) } -> std::convertible_to<CommandType>;
+  {
+    static_cast<CommandType>(*std::begin(t))
+  } -> std::convertible_to<CommandType>;
 };
 
-class CommandBusSubscriber {
- public:
+class CommandBusSubscriber
+{
+public:
   virtual void notify(const Command& cmd) = 0;
 };
 
-class CommandBusInterface {
- public:
+class CommandBusInterface
+{
+public:
   virtual ~CommandBusInterface() = default;
   virtual void publish(std::unique_ptr<Command>&& cmd) = 0;
   virtual void subscribe(CommandType,
                          std::shared_ptr<CommandBusSubscriber>) = 0;
 
-  template<typename T> 
-  requires std::is_convertible_v<CommandType, 
-                                 decltype(static_cast<CommandType>(std::declval<T>()))>
-  void subscribe(T type, std::shared_ptr<CommandBusSubscriber> sub) {
+  template<typename T>
+    requires std::is_convertible_v<
+      CommandType,
+      decltype(static_cast<CommandType>(std::declval<T>()))>
+  void subscribe(T type, std::shared_ptr<CommandBusSubscriber> sub)
+  {
     subscribe(static_cast<CommandType>(type), sub);
   }
 
   template<CommandTypeContainer T>
-  void subscribe(const T& types,
-                    std::shared_ptr<CommandBusSubscriber> sub)
+  void subscribe(const T& types, std::shared_ptr<CommandBusSubscriber> sub)
   {
     for (auto t : types) {
       subscribe(t, sub);
@@ -53,16 +58,19 @@ class CommandBusInterface {
   }
 };
 
-class CommandBus : public CommandBusInterface,
-                   public util::Singleton<CommandBusInterface> {
- public:
+class CommandBus
+  : public CommandBusInterface
+  , public util::Singleton<CommandBusInterface>
+{
+public:
   virtual ~CommandBus() = default;
 };
 
-class MainCommandBus : public CommandBus {
+class MainCommandBus : public CommandBus
+{
   boost::asio::thread_pool m_ioct;
   boost::asio::executor_work_guard<boost::asio::thread_pool::executor_type>
-      m_workGuard;
+    m_workGuard;
 
   using SubscriberList = std::vector<std::weak_ptr<CommandBusSubscriber>>;
 
@@ -70,12 +78,13 @@ class MainCommandBus : public CommandBus {
 
   void notifyAll(const Command& cmd);
 
-  template <typename T>
-  void post(T&& callback) {
+  template<typename T>
+  void post(T&& callback)
+  {
     boost::asio::post(m_ioct.executor(), std::move(callback));
   }
 
- public:
+public:
   MainCommandBus();
   ~MainCommandBus();
 

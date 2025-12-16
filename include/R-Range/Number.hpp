@@ -8,11 +8,10 @@
  ***************************************************/
 #pragma once
 
-#include <string>
 #include "Object.hpp"
+#include <string>
 
-class Number
-  : public Object
+class Number : public Object
 {
   std::string m_number;
 
@@ -21,8 +20,8 @@ class Number
 public:
   Number(const std::string& s)
     : m_number(normalizeNumber(s))
-  { }
+  {
+  }
 
-  inline
-  const std::string number() { return m_number; }
+  inline const std::string number() { return m_number; }
 };
