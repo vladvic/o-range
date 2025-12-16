@@ -12,6 +12,11 @@
 
 Leg::Leg() {}
 
+void Leg::setCall(std::shared_ptr<Call> call)
+{
+  m_call = call;
+}
+
 std::shared_ptr<Call> Leg::call()
 {
   auto call = m_call.lock();

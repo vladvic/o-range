@@ -15,8 +15,12 @@ class Call;
 
 class Leg : public Object
 {
+  friend class Call;
+
   std::weak_ptr<Session> m_session;
   std::weak_ptr<Call> m_call;
+
+  void setCall(std::shared_ptr<Call>);
 
 public:
   Leg();

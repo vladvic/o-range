@@ -9,6 +9,7 @@
 #pragma once
 
 #include <S2B/CommandBus.hpp>
+#include <S2B/SignalCommand.hpp>
 #include <util/Singleton.hpp>
 
 #include "ArenaLocator.hpp"

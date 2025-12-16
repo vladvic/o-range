@@ -23,5 +23,6 @@ class Call : public Object
   std::shared_ptr<Call> fromLeg(std::shared_ptr<Leg> leg);
 
 public:
+  void setInitiatingLeg(std::shared_ptr<Leg> leg);
   std::shared_ptr<Leg> leg();
 };

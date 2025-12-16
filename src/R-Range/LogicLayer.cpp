@@ -7,7 +7,6 @@
  * $Date$
  ***************************************************/
 
-#include <S2B/SignalCommand.hpp>
 #include <iostream>
 #include <signal.h>
 #include <unistd.h>
@@ -62,6 +61,7 @@ void LogicLayer::process<SignalEventType::CREATED>(const SignalCommand& cmd)
         std::make_unique<TokenSessionId>(sessionId), device);
       auto call = std::make_shared<Call>();
       auto leg = std::make_shared<Leg>();
+      call->setInitiatingLeg(leg);
       arena->add(device);
       arena->add(session);
       /* TODO: Perform configuration step */
@@ -74,7 +74,24 @@ void LogicLayer::process<SignalEventType::CREATED>(const SignalCommand& cmd)
 template<>
 void LogicLayer::process<SignalEventType::ACCEPTED>(const SignalCommand& cmd)
 {
-  auto completionToken = cmd.getCompletionToken();
+  auto sessionId = cmd.getCompletionToken();
+  post(
+    [sessionId]() mutable
+    {
+      auto arena = ArenaLocator::locate((intptr_t)(sessionId.get()));
+      if (!arena) {
+        return;
+      }
+      auto session = arena->session((intptr_t)sessionId.get());
+      auto leg = session->leg()->call()->leg();
+      if (leg) {
+        auto& id = dynamic_cast<const TokenSessionId&>(leg->session()->id());
+        auto accept =
+          std::make_unique<SignalCommand>(SignalCommandType::ACCEPT);
+        accept->setCompletionToken(id.token());
+        CommandBus::instance().publish(std::move(accept));
+      }
+    });
 }
 
 template<>
@@ -94,8 +111,6 @@ void LogicLayer::process<SignalEventType::RINGING>(const SignalCommand& cmd)
       if (!arena) {
         return;
       }
-      /* TODO: Locate number */
-      // auto number  = std::make_shared<Number>();
       auto session = arena->session((intptr_t)sessionId.get());
       auto leg = session->leg()->call()->leg();
       if (leg) {
@@ -111,7 +126,24 @@ void LogicLayer::process<SignalEventType::RINGING>(const SignalCommand& cmd)
 template<>
 void LogicLayer::process<SignalEventType::REJECTED>(const SignalCommand& cmd)
 {
-  auto completionToken = cmd.getCompletionToken();
+  auto sessionId = cmd.getCompletionToken();
+  post(
+    [sessionId]() mutable
+    {
+      auto arena = ArenaLocator::locate((intptr_t)(sessionId.get()));
+      if (!arena) {
+        return;
+      }
+      auto session = arena->session((intptr_t)sessionId.get());
+      auto leg = session->leg()->call()->leg();
+      if (leg) {
+        auto& id = dynamic_cast<const TokenSessionId&>(leg->session()->id());
+        auto reject =
+          std::make_unique<SignalCommand>(SignalCommandType::REJECT);
+        reject->setCompletionToken(id.token());
+        CommandBus::instance().publish(std::move(reject));
+      }
+    });
 }
 
 template<>
@@ -123,7 +155,24 @@ void LogicLayer::process<SignalEventType::MODIFIED>(const SignalCommand& cmd)
 template<>
 void LogicLayer::process<SignalEventType::TERMINATED>(const SignalCommand& cmd)
 {
-  auto completionToken = cmd.getCompletionToken();
+  auto sessionId = cmd.getCompletionToken();
+  post(
+    [sessionId]() mutable
+    {
+      auto arena = ArenaLocator::locate((intptr_t)(sessionId.get()));
+      if (!arena) {
+        return;
+      }
+      auto session = arena->session((intptr_t)sessionId.get());
+      auto leg = session->leg()->call()->leg();
+      if (leg) {
+        auto& id = dynamic_cast<const TokenSessionId&>(leg->session()->id());
+        auto terminate =
+          std::make_unique<SignalCommand>(SignalCommandType::TERMINATE);
+        terminate->setCompletionToken(id.token());
+        CommandBus::instance().publish(std::move(terminate));
+      }
+    });
 }
 
 void LogicLayer::notify(const Command& cmd)

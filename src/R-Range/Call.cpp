@@ -8,12 +8,19 @@
  ***************************************************/
 
 #include "Call.hpp"
+#include "Leg.hpp"
 
 std::shared_ptr<Call> Call::fromLeg(std::shared_ptr<Leg> leg)
 {
   m_fromLeg = leg;
   return std::dynamic_pointer_cast<Call>(shared_from_this());
 };
+
+void Call::setInitiatingLeg(std::shared_ptr<Leg> leg)
+{
+  std::get<0>(m_legs) = leg;
+  leg->setCall(std::dynamic_pointer_cast<Call>(shared_from_this()));
+}
 
 std::shared_ptr<Leg> Call::leg()
 {
