@@ -10,6 +10,7 @@
 
 #include <S2B/CommandBus.hpp>
 #include <S2B/SignalCommand.hpp>
+#include <boost/asio.hpp>
 #include <util/Singleton.hpp>
 
 #include "ArenaLocator.hpp"
@@ -33,8 +34,8 @@ class LogicLayer
   , public std::enable_shared_from_this<LogicLayer>
   , public util::Singleton<LogicLayer>
 {
-  boost::asio::thread_pool m_threadPool;
-  boost::asio::executor_work_guard<boost::asio::thread_pool::executor_type>
+  boost::asio::io_context m_ioct;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
     m_workGuard;
   boost::asio::signal_set m_signalSet;
 
@@ -45,7 +46,7 @@ class LogicLayer
   template<typename T>
   void post(T&& callback)
   {
-    boost::asio::post(m_threadPool.executor(), std::move(callback));
+    boost::asio::post(m_ioct, std::move(callback));
   }
 
   template<SignalEventType T>

@@ -24,13 +24,12 @@
 void LogicLayer::stop()
 {
   post( // Make sure all previous work is done before stop() is executed
-    [this]() { m_threadPool.stop(); });
+    [this]() { m_ioct.stop(); });
 }
 
 LogicLayer::LogicLayer()
-  : m_threadPool(0) // We'll attach running thread via run()
-  , m_workGuard(boost::asio::make_work_guard(m_threadPool))
-  , m_signalSet(m_threadPool.get_executor())
+  : m_workGuard(boost::asio::make_work_guard(m_ioct))
+  , m_signalSet(m_ioct)
 {
   m_signalSet.add(SIGINT);
   m_signalSet.async_wait([this](boost::system::error_code ec, int num)
@@ -213,5 +212,5 @@ void LogicLayer::init()
 
 void LogicLayer::run()
 {
-  m_threadPool.attach();
+  m_ioct.run();
 }
