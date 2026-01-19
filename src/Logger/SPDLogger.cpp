@@ -58,13 +58,13 @@ static constexpr inline LogLevel from_spd(spdlog::level::level_enum l)
   return L::info;
 }
 
-SPDLogger::SPDLogger()
+SPDLogger::SPDLogger(const std::filesystem::path& logPath)
   : m_logLevel({
       { SinkType::Default, spdlog::level::info },
       { SinkType::Console, spdlog::level::info },
-      { SinkType::PCAP, spdlog::level::debug },
+      { SinkType::PCAP, spdlog::level::trace },
     })
-  , m_fileName(DEFAULT_LOG_FILE)
+  , m_fileName(logPath)
 {
   createDefaultLoggers();
 }

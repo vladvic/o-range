@@ -32,7 +32,7 @@ class SPDLogger : public ILoggerImpl
   void createDefaultLoggers();
 
 public:
-  SPDLogger();
+  SPDLogger(const std::filesystem::path& logPath = DEFAULT_LOG_FILE);
   ~SPDLogger();
 
   void setLogLevel(SinkType sink, LogLevel lvl);

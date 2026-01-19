@@ -15,6 +15,7 @@
 #include "Call.hpp"
 #include "Device.hpp"
 #include "Leg.hpp"
+#include "Logger/Logger.hpp"
 #include "Number.hpp"
 #include "ObjectArena.hpp"
 #include "Session.hpp"
@@ -64,6 +65,19 @@ void LogicLayer::process<SignalEventType::CREATED>(const SignalCommand& cmd)
       arena->add(device);
       arena->add(session);
       /* TODO: Perform configuration step */
+      auto makeCall =
+        std::make_unique<SignalCommand>(SignalCommandType::CREATE);
+      makeCall->source() = from;
+      makeCall->destination() = to + ":5061";
+      makeCall->setCompletionToken();
+      LOG_INFO("Creating outbound call to {}", makeCall->destination()).show();
+      auto outboundSessionId = makeCall->getCompletionToken();
+      auto outboundDevice = std::make_shared<Device>(to);
+      auto outboundSession = std::make_shared<Session>(
+        std::make_unique<TokenSessionId>(outboundSessionId), outboundDevice);
+      arena->add(outboundDevice);
+      arena->add(outboundSession);
+      CommandBus::instance().publish(std::move(makeCall));
     });
   auto progress = std::make_unique<SignalCommand>(SignalCommandType::PROGRESS);
   progress->setCompletionToken(sessionId);
