@@ -6,7 +6,8 @@
  * $Rev$
  * $Date$
  ***************************************************/
-#pragma once
+#ifndef LOGGER_LOGGER_HPP
+#define LOGGER_LOGGER_HPP
 
 #include <format>
 #include <memory>
@@ -163,6 +164,12 @@ private:
     return LogEmitter{ ILoggerImpl::instance(), lvl, std::move(msg), loc };
   }
 };
+
+} // namespace Log
+
+#endif
+
+namespace Logger {
 
 #ifdef LOG_TRACE
 #undef LOG_TRACE

@@ -7,6 +7,9 @@
 #include <resip/dum/ClientInviteSession.hxx>
 #include <resip/dum/ServerInviteSession.hxx>
 
+#include "Formatters.hpp"
+#include "Logger/Logger.hpp"
+
 void ORangeSessionHandler::onNewSession(
   resip::ServerInviteSessionHandle h,
   resip::InviteSession::OfferAnswerType oat,
@@ -20,21 +23,6 @@ void ORangeSessionHandler::onNewSession(
   cmd->source() = from.uri().getAorNoReally().c_str();
   cmd->destination() = to.uri().getAorNoReally().c_str();
   CommandBus::instance().publish(std::move(cmd));
-  /*
-  boost::asio::co_spawn(
-      SipStack::instance().getDUMIOContext(),
-      [h]() mutable -> boost::asio::awaitable<void> {
-        boost::asio::steady_timer timer(
-            co_await boost::asio::this_coro::executor);
-
-        timer.expires_after(std::chrono::milliseconds(500));
-        co_await timer.async_wait(boost::asio::use_awaitable);
-        if (h.isValid()) {
-          h->reject(486);
-        }
-      },
-      boost::asio::detached);
-  */
 }
 
 void ORangeSessionHandler::onNewSession(
@@ -42,19 +30,19 @@ void ORangeSessionHandler::onNewSession(
   resip::InviteSession::OfferAnswerType oat,
   const resip::SipMessage& msg)
 {
-  std::cout << "Starting outgoing Session" << std::endl;
+  LOG_INFO("Starting outgoing Session").show();
 }
 
 void ORangeSessionHandler::onProvisional(resip::ClientInviteSessionHandle h,
                                          const resip::SipMessage& msg)
 {
-  std::cout << "Got provisional " << msg << std::endl;
+  LOG_INFO("Got provisional {}", msg).show();
 }
 
 void ORangeSessionHandler::onOfferRequired(resip::InviteSessionHandle h,
                                            const resip::SipMessage& msg)
 {
-  std::cout << "Offer required for dialog " << std::endl;
+  LOG_INFO("Offer required for dialog ").show();
 }
 
 void ORangeSessionHandler::onTerminated(
@@ -62,10 +50,10 @@ void ORangeSessionHandler::onTerminated(
   InviteSessionHandler::TerminatedReason reason,
   const resip::SipMessage* related)
 {
-  std::cout << "Session terminated " << std::endl;
+  LOG_INFO("Session terminated ").show();
 }
 void ORangeSessionHandler::onFailure(resip::ClientInviteSessionHandle,
                                      const resip::SipMessage& msg)
 {
-  std::cout << "FUCKING FAILURE" << std::endl;
+  LOG_INFO("FUCKING FAILURE").show();
 }

@@ -10,6 +10,9 @@ extern "C" {
 #include <sys/eventfd.h>
 }
 
+#include "Formatters.hpp"
+#include "Logger/Logger.hpp"
+
 SipStack::SipStack()
   : m_logger(std::make_unique<CustomLogger>())
   , m_masterProfile(std::make_shared<resip::MasterProfile>())
@@ -89,10 +92,10 @@ void SipStack::processDUMOnTimer()
 void SipStack::notify(const Command& cmd)
 {
   const auto& sip_cmd = dynamic_cast<const SignalCommand&>(cmd);
-  std::cout << "Received SIP command: "
-            << util::enum_traits<SignalCommandType>::get_name(
-                 (SignalCommandType)sip_cmd.type())
-            << std::endl;
+  LOG_INFO("Received SIP command: {}",
+           util::enum_traits<SignalCommandType>::get_name(
+             (SignalCommandType)sip_cmd.type()))
+    .show();
   boost::asio::post(
     m_IOContext,
     [this]()
