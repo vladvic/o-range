@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <resip/dum/DialogUsageManager.hxx>
 #include <resip/dum/InviteSessionHandler.hxx>
+#include <resip/dum/ServerInviteSession.hxx>
 #include <resip/stack/EventStackThread.hxx>
 #include <resip/stack/SipStack.hxx>
 extern "C" {
@@ -38,6 +39,8 @@ SipStack::SipStack()
 
   m_DUM.setMasterProfile(m_masterProfile);
   m_DUM.setInviteSessionHandler(&m_sessionHandler);
+  m_DUM.setAppDialogSetFactory(std::make_unique<ORangeAppDialogSetFactory>(
+    this)); // <- accepts unique_ptr, no leak
 
   m_stackThread.run();
 
@@ -52,6 +55,26 @@ SipStack::~SipStack()
   }
   m_stackThread.shutdown();
   m_stackThread.join();
+}
+
+void SipStack::addDialog(ORangeAppDialog* ads)
+{
+  m_sessions[ads->getSessionToken()] = ads;
+}
+
+void SipStack::removeDialog(ORangeAppDialog* ads)
+{
+  m_sessions.erase(ads->getSessionToken());
+}
+
+ORangeAppDialog* SipStack::findDialog(const CompletionToken& id)
+{
+  auto it = m_sessions.find(id);
+
+  if (it == m_sessions.end()) {
+    return nullptr;
+  }
+  return it->second;
 }
 
 void SipStack::startDUM()
@@ -89,6 +112,99 @@ void SipStack::processDUMOnTimer()
                      { processDUMOnTimer(); });
 }
 
+template<>
+void SipStack::processS2BCommand<SignalCommandType::CREATE>(
+  const SignalCommand& cmd)
+{
+  std::string from = cmd.source();
+  std::string to = cmd.destination();
+  CompletionToken id = cmd.getCompletionToken();
+
+  boost::asio::post(
+    m_IOContext,
+    [this, from, to, id]()
+    {
+      LOG_INFO("Placing outbound call: {} -> {}", from, to).show();
+      resip::NameAddr target(from);
+      auto customProfile = std::make_shared<resip::UserProfile>();
+      customProfile->setUserAgent("ORange PBX/1.0");
+      customProfile->setDefaultFrom(resip::NameAddr(to));
+      auto dialogSet = std::make_unique<ORangeAppDialogSet>(this, m_DUM, id);
+      auto inviteSession = m_DUM.makeInviteSession(
+        target,
+        customProfile,
+        nullptr,
+        dynamic_cast<resip::AppDialogSet*>(dialogSet.release()));
+      m_DUM.send(inviteSession);
+    });
+}
+
+template<>
+void SipStack::processS2BCommand<SignalCommandType::RINGING>(
+  const SignalCommand& cmd)
+{
+  CompletionToken id = cmd.getCompletionToken();
+
+  boost::asio::post(m_IOContext,
+                    [this, id]()
+                    {
+                      LOG_INFO("Sending RINGING message").show();
+                      ORangeAppDialog* ads = findDialog(id);
+                      auto ihs = ads->getInviteSession();
+                      auto sish =
+                        dynamic_cast<resip::ServerInviteSession*>(ihs.get());
+                      if (sish) {
+                        sish->provisional(180);
+                      }
+                    });
+}
+
+template<>
+void SipStack::processS2BCommand<SignalCommandType::REJECT>(
+  const SignalCommand& cmd)
+{
+  CompletionToken id = cmd.getCompletionToken();
+  auto rejectReason = cmd.rejectReason();
+
+  boost::asio::post(m_IOContext,
+                    [this, id, rejectReason]()
+                    {
+                      LOG_INFO("Sending REJECT message").show();
+                      ORangeAppDialog* ads = findDialog(id);
+                      auto ihs = ads->getInviteSession();
+                      auto sish =
+                        dynamic_cast<resip::ServerInviteSession*>(ihs.get());
+                      if (sish) {
+                        switch (rejectReason) {
+                        case SignalCommandRejectReason::BAD_REQUEST:
+                          sish->reject(400);
+                          break;
+                        case SignalCommandRejectReason::BUSY:
+                          sish->reject(486);
+                          break;
+                        case SignalCommandRejectReason::TIMEOUT:
+                          sish->reject(408);
+                          break;
+                        case SignalCommandRejectReason::TERMINATED:
+                          sish->reject(487);
+                          break;
+                        case SignalCommandRejectReason::FORBIDDEN:
+                          sish->reject(403);
+                          break;
+                        case SignalCommandRejectReason::NOT_FOUND:
+                          sish->reject(404);
+                          break;
+                        case SignalCommandRejectReason::NOT_ACCEPTABLE_HERE:
+                          sish->reject(488);
+                          break;
+                        default:
+                          sish->reject(500);
+                          break;
+                        }
+                      }
+                    });
+}
+
 void SipStack::notify(const Command& cmd)
 {
   const auto& sip_cmd = dynamic_cast<const SignalCommand&>(cmd);
@@ -96,18 +212,17 @@ void SipStack::notify(const Command& cmd)
            util::enum_traits<SignalCommandType>::get_name(
              (SignalCommandType)sip_cmd.type()))
     .show();
-  boost::asio::post(
-    m_IOContext,
-    [this]()
-    {
-      resip::NameAddr target("sip:200@127.0.0.1:5062");
-      auto customProfile = std::make_shared<resip::UserProfile>();
-      customProfile->setUserAgent("ORange PBX/1.0");
-      customProfile->setDefaultFrom(resip::NameAddr("sip:100@127.0.0.1:5060"));
-      auto inviteSession =
-        m_DUM.makeInviteSession(target, customProfile, nullptr);
-      m_DUM.send(inviteSession);
-    });
+  switch ((SignalCommandType)sip_cmd.type()) {
+  case SignalCommandType::CREATE:
+    processS2BCommand<SignalCommandType::CREATE>(sip_cmd);
+    break;
+  case SignalCommandType::RINGING:
+    processS2BCommand<SignalCommandType::RINGING>(sip_cmd);
+    break;
+  case SignalCommandType::REJECT:
+    processS2BCommand<SignalCommandType::REJECT>(sip_cmd);
+    break;
+  }
 }
 
 void SipStack::init()

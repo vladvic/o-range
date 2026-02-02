@@ -55,3 +55,13 @@ const std::string& SignalCommand::source() const
 {
   return m_destination;
 }
+
+SignalCommandRejectReason& SignalCommand::rejectReason()
+{
+  return m_rejectReason;
+}
+
+const SignalCommandRejectReason& SignalCommand::rejectReason() const
+{
+  return m_rejectReason;
+}

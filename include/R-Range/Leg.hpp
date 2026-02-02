@@ -25,5 +25,6 @@ class Leg : public Object
 public:
   Leg();
   inline std::shared_ptr<Session> session() { return m_session.lock(); }
+  void setSession(std::shared_ptr<Session> s);
   std::shared_ptr<Call> call();
 };

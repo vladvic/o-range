@@ -61,9 +61,12 @@ void LogicLayer::process<SignalEventType::CREATED>(const SignalCommand& cmd)
         std::make_unique<TokenSessionId>(sessionId), device);
       auto call = std::make_shared<Call>();
       auto leg = std::make_shared<Leg>();
+      leg->setSession(session);
       call->setInitiatingLeg(leg);
       arena->add(device);
       arena->add(session);
+      arena->add(call);
+      arena->add(leg);
       /* TODO: Perform configuration step */
       auto makeCall =
         std::make_unique<SignalCommand>(SignalCommandType::CREATE);
@@ -75,8 +78,12 @@ void LogicLayer::process<SignalEventType::CREATED>(const SignalCommand& cmd)
       auto outboundDevice = std::make_shared<Device>(to);
       auto outboundSession = std::make_shared<Session>(
         std::make_unique<TokenSessionId>(outboundSessionId), outboundDevice);
+      auto outboundLeg = std::make_shared<Leg>();
+      outboundLeg->setSession(outboundSession);
+      call->setOutboundLeg(outboundLeg);
       arena->add(outboundDevice);
       arena->add(outboundSession);
+      arena->add(outboundLeg);
       CommandBus::instance().publish(std::move(makeCall));
     });
   auto progress = std::make_unique<SignalCommand>(SignalCommandType::PROGRESS);
@@ -140,8 +147,9 @@ template<>
 void LogicLayer::process<SignalEventType::REJECTED>(const SignalCommand& cmd)
 {
   auto sessionId = cmd.getCompletionToken();
+  auto rejectReason = cmd.rejectReason();
   post(
-    [sessionId]() mutable
+    [sessionId, rejectReason]() mutable
     {
       auto arena = ArenaLocator::locate((intptr_t)(sessionId.get()));
       if (!arena) {
@@ -154,6 +162,7 @@ void LogicLayer::process<SignalEventType::REJECTED>(const SignalCommand& cmd)
         auto reject =
           std::make_unique<SignalCommand>(SignalCommandType::REJECT);
         reject->setCompletionToken(id.token());
+        reject->rejectReason() = rejectReason;
         CommandBus::instance().publish(std::move(reject));
       }
     });
@@ -192,6 +201,7 @@ void LogicLayer::notify(const Command& cmd)
 {
   if (cmd.hasEnumType<SignalEventType>()) {
     auto& signalCommand = dynamic_cast<const SignalCommand&>(cmd);
+    LOG_INFO("Got command {}", (SignalEventType)signalCommand.type()).show();
 
     switch ((SignalEventType)cmd.type()) {
     case SignalEventType::CREATED:

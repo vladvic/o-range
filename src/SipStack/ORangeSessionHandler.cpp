@@ -15,8 +15,12 @@ void ORangeSessionHandler::onNewSession(
   resip::InviteSession::OfferAnswerType oat,
   const resip::SipMessage& msg)
 {
+  auto dialogSetHandle = h->getAppDialogSet();
+  auto orangeAppDialogSet =
+    dynamic_cast<ORangeAppDialogSet*>(dialogSetHandle.get());
+
   auto cmd = std::make_unique<SignalCommand>(SignalEventType::CREATED);
-  cmd->setCompletionToken();
+  cmd->setCompletionToken(orangeAppDialogSet->getSessionToken());
   const resip::NameAddr& from = msg.header(resip::h_From);
   const resip::NameAddr& to = msg.header(resip::h_To);
 
@@ -37,6 +41,25 @@ void ORangeSessionHandler::onProvisional(resip::ClientInviteSessionHandle h,
                                          const resip::SipMessage& msg)
 {
   LOG_INFO("Got provisional {}", msg).show();
+  auto dialogSetHandle = h->getAppDialogSet();
+  auto orangeAppDialogSet =
+    dynamic_cast<ORangeAppDialogSet*>(dialogSetHandle.get());
+
+  auto statusLine = msg.header(resip::h_StatusLine);
+
+  SignalEventType type = SignalEventType::INVALID;
+
+  switch (statusLine.statusCode()) {
+  case 180:
+    type = SignalEventType::RINGING;
+    break;
+  }
+
+  if (type != SignalEventType::INVALID) {
+    auto cmd = std::make_unique<SignalCommand>(type);
+    cmd->setCompletionToken(orangeAppDialogSet->getSessionToken());
+    CommandBus::instance().publish(std::move(cmd));
+  }
 }
 
 void ORangeSessionHandler::onOfferRequired(resip::InviteSessionHandle h,
@@ -52,8 +75,27 @@ void ORangeSessionHandler::onTerminated(
 {
   LOG_INFO("Session terminated ").show();
 }
-void ORangeSessionHandler::onFailure(resip::ClientInviteSessionHandle,
+void ORangeSessionHandler::onFailure(resip::ClientInviteSessionHandle h,
                                      const resip::SipMessage& msg)
 {
-  LOG_INFO("FUCKING FAILURE").show();
+  LOG_INFO("Session rejected").show();
+  auto dialogSetHandle = h->getAppDialogSet();
+  auto orangeAppDialogSet =
+    dynamic_cast<ORangeAppDialogSet*>(dialogSetHandle.get());
+
+  auto statusLine = msg.header(resip::h_StatusLine);
+
+  SignalEventType type = SignalEventType::REJECTED;
+  SignalCommandRejectReason reason = SignalCommandRejectReason::INTERNAL_ERROR;
+
+  switch (statusLine.statusCode()) {
+  case 486:
+    reason = SignalCommandRejectReason::BUSY;
+    break;
+  }
+
+  auto cmd = std::make_unique<SignalCommand>(type);
+  cmd->rejectReason() = reason;
+  cmd->setCompletionToken(orangeAppDialogSet->getSessionToken());
+  CommandBus::instance().publish(std::move(cmd));
 }

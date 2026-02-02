@@ -87,7 +87,7 @@ RUN cd /tmp && \
     cd .. && \
     rm -rf sipp
 
-RUN apt update && apt install -y libspdlog-dev
+RUN apt update && apt install -y libspdlog-dev vim
 
 USER developer
 WORKDIR /home/developer

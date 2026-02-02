@@ -4,8 +4,10 @@ extern "C" {
 #include <unistd.h>
 }
 
+#include <ORangeAppDialogSet.hpp>
 #include <ORangeSessionHandler.hpp>
 #include <S2B/CommandBus.hpp>
+#include <S2B/SignalCommand.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -59,10 +61,17 @@ public:
   void notify(const Command& cmd) override;
   void init();
 
+  void addDialog(ORangeAppDialog*);
+  void removeDialog(ORangeAppDialog*);
+  ORangeAppDialog* findDialog(const CompletionToken&);
+
 private:
   void startDUM();
   void processDUMOnTimer();
   void processDUMOnEventFd();
+
+  template<SignalCommandType Type>
+  void processS2BCommand(const SignalCommand& cmd);
 
   std::unique_ptr<CustomLogger> m_logger;
   std::shared_ptr<resip::MasterProfile> m_masterProfile;
@@ -77,5 +86,6 @@ private:
   boost::asio::posix::stream_descriptor m_asio_eventFd;
   boost::asio::steady_timer m_timer;
   ORangeSessionHandler m_sessionHandler;
+  std::unordered_map<CompletionToken, ORangeAppDialog*> m_sessions;
   bool m_running{ true };
 };

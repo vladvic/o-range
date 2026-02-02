@@ -22,6 +22,12 @@ void Call::setInitiatingLeg(std::shared_ptr<Leg> leg)
   leg->setCall(std::dynamic_pointer_cast<Call>(shared_from_this()));
 }
 
+void Call::setOutboundLeg(std::shared_ptr<Leg> leg)
+{
+  std::get<1>(m_legs) = leg;
+  leg->setCall(std::dynamic_pointer_cast<Call>(shared_from_this()));
+}
+
 std::shared_ptr<Leg> Call::leg()
 {
   auto leg = std::get<0>(m_legs).lock();

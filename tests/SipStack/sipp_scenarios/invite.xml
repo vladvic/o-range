@@ -28,6 +28,7 @@
   </send>
 
   <recv response="100" optional="true"/>
+  <recv response="180"/>
   <recv response="486"/>
   
   <!-- Пробуем разные варианты для branch -->

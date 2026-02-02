@@ -9,12 +9,21 @@
 
 #include "Leg.hpp"
 #include "Call.hpp"
+#include "Session.hpp"
 
 Leg::Leg() {}
 
 void Leg::setCall(std::shared_ptr<Call> call)
 {
   m_call = call;
+}
+
+void Leg::setSession(std::shared_ptr<Session> s)
+{
+  m_session = s;
+  if (s->leg() != shared_from_this()) {
+    s->setLeg(std::dynamic_pointer_cast<Leg>(shared_from_this()));
+  }
 }
 
 std::shared_ptr<Call> Leg::call()

@@ -1,6 +1,7 @@
 set(SRC
         SipStack.cpp
         ORangeSessionHandler.cpp
+        ORangeAppDialogSet.cpp
    )
 
 find_library(Boost COMPONENTS asio)

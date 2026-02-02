@@ -13,6 +13,18 @@
 
 #include "Command.hpp"
 
+enum class SignalCommandRejectReason
+{
+  BAD_REQUEST,
+  BUSY,
+  TIMEOUT,
+  TERMINATED,
+  FORBIDDEN,
+  NOT_FOUND,
+  NOT_ACCEPTABLE_HERE,
+  INTERNAL_ERROR
+};
+
 enum class SignalCommandType : CommandType
 {
   CREATE = -127, // Incoming offer, outbound call request
@@ -21,18 +33,20 @@ enum class SignalCommandType : CommandType
   RINGING,
   REJECT,
   MODIFY,
-  TERMINATE
+  TERMINATE,
+  INVALID
 };
 
 enum class SignalEventType : CommandType
 {
-  CREATED = -117, // Incoming offer, outbound call request
+  CREATED = -110, // Incoming offer, outbound call request
   ACCEPTED,       // Accept session, or notification
   PROGRESS,
   RINGING,
   REJECTED,
   MODIFIED,
-  TERMINATED
+  TERMINATED,
+  INVALID
 };
 
 class MediaLine;
@@ -45,6 +59,7 @@ class SignalCommand : public Command
   std::list<MediaLinePtr> m_media;
   std::string m_source;
   std::string m_destination;
+  SignalCommandRejectReason m_rejectReason;
 
 public:
   SignalCommand(SignalCommandType);
@@ -57,4 +72,6 @@ public:
   const std::string& source() const;
   std::string& destination();
   const std::string& destination() const;
+  SignalCommandRejectReason& rejectReason();
+  const SignalCommandRejectReason& rejectReason() const;
 };

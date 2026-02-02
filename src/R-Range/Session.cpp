@@ -8,12 +8,21 @@
  ***************************************************/
 
 #include "Session.hpp"
+#include "Leg.hpp"
 
 Session::Session(std::unique_ptr<SessionId>&& id,
                  std::shared_ptr<Device> device)
   : m_id(std::move(id))
   , m_device(device)
 {
+}
+
+void Session::setLeg(std::shared_ptr<Leg> leg)
+{
+  m_leg = leg;
+  if (leg->session() != shared_from_this()) {
+    leg->setSession(std::dynamic_pointer_cast<Session>(shared_from_this()));
+  }
 }
 
 Session::~Session() {}

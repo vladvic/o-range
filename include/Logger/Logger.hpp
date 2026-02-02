@@ -9,6 +9,7 @@
 #ifndef LOGGER_LOGGER_HPP
 #define LOGGER_LOGGER_HPP
 
+#include "Formatters.hpp"
 #include <format>
 #include <memory>
 #include <optional>

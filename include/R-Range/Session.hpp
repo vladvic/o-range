@@ -34,4 +34,6 @@ public:
   inline const SessionId& id() const { return *m_id; }
   inline std::shared_ptr<Device> device() { return m_device.lock(); }
   inline std::shared_ptr<Leg> leg() { return m_leg.lock(); }
+
+  void setLeg(std::shared_ptr<Leg> leg);
 };
