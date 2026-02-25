@@ -11,10 +11,14 @@
 #include <S2B/CommandBus.hpp>
 #include <S2B/SignalCommand.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/awaitable.hpp>
 #include <util/Singleton.hpp>
 
 #include "ArenaLocator.hpp"
 #include "Session.hpp"
+
+class ScriptProvider;
+class Script;
 
 class TokenSessionId : public SessionId
 {
@@ -40,6 +44,7 @@ class LogicLayer
   boost::asio::signal_set m_signalSet;
 
   ArenaLocator m_arenaLocator;
+  ScriptProvider* m_scriptProvider{ nullptr };
 
   void stop();
 
@@ -49,11 +54,16 @@ class LogicLayer
     boost::asio::post(m_ioct, std::move(callback));
   }
 
+  boost::asio::awaitable<std::shared_ptr<Script>> getEventScript(
+    const SignalCommand& cmd);
+  boost::asio::awaitable<bool> handleEventScript(const SignalCommand& cmd);
+
   template<SignalEventType T>
   void process(const SignalCommand& cmd);
 
 public:
   LogicLayer();
+  void setScriptProvider(ScriptProvider* provider);
   void notify(const Command& cmd) override;
   void init();
   void run();

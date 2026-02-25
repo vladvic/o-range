@@ -7,6 +7,7 @@
  * $Date$
  ***************************************************/
 
+#include <D2L/LuaScriptProvider.hpp>
 #include <Logger/ExceptionHandler.hpp>
 #include <Logger/SPDLogger.hpp>
 #include <R-Range/LogicLayer.hpp>
@@ -20,9 +21,11 @@ int main(int argc, char** argv)
   Logger::ExceptionHandler exceptionHandler;
   Logger::SPDLogger logger;
   MainCommandBus bus;
+  LuaScriptProvider scriptProvider;
 
   auto stack = std::make_shared<SipStack>();
   auto logic = std::make_shared<LogicLayer>();
+  logic->setScriptProvider(&scriptProvider);
   logic->init();
   stack->init();
 

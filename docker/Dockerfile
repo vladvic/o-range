@@ -27,6 +27,7 @@ RUN apt update && apt install -y \
     libncurses-dev \
     libmagicenum-dev \
     libbenchmark-dev \
+    liblua5.4-dev \
     sox \
     xxd \
     wget \

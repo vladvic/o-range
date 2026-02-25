@@ -11,6 +11,7 @@ add_subdirectory(src/Logger)
 add_subdirectory(src/R-Range)
 add_subdirectory(src/S2B)
 add_subdirectory(src/SipStack)
+add_subdirectory(src/D2L)
 add_subdirectory(src)
 
 add_subdirectory(tests/Logger)

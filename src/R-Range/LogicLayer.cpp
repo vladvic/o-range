@@ -7,6 +7,9 @@
  * $Date$
  ***************************************************/
 
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/dispatch.hpp>
+#include <boost/asio/use_awaitable.hpp>
 #include <iostream>
 #include <signal.h>
 #include <unistd.h>
@@ -18,6 +21,9 @@
 #include "Logger/Logger.hpp"
 #include "Number.hpp"
 #include "ObjectArena.hpp"
+#include "Script.hpp"
+#include "ScriptKey.hpp"
+#include "ScriptProvider.hpp"
 #include "Session.hpp"
 
 #include "LogicLayer.hpp"
@@ -35,6 +41,46 @@ LogicLayer::LogicLayer()
   m_signalSet.add(SIGINT);
   m_signalSet.async_wait([this](boost::system::error_code ec, int num)
                          { stop(); });
+}
+
+void LogicLayer::setScriptProvider(ScriptProvider* provider)
+{
+  m_scriptProvider = provider;
+}
+
+boost::asio::awaitable<bool> LogicLayer::handleEventScript(
+  const SignalCommand& cmd)
+{
+  auto script = co_await getEventScript(cmd);
+  if (!script) {
+    co_return false;
+  }
+  auto token = cmd.getCompletionToken();
+  auto arena = ArenaLocator::locate((intptr_t)(token.get()));
+  if (!arena) {
+    if ((SignalEventType)cmd.type() == SignalEventType::CREATED) {
+      arena = std::make_shared<ObjectArena>();
+    }
+    else {
+      co_return false;
+    }
+  }
+  co_return script->execute(*arena, cmd);
+}
+
+boost::asio::awaitable<std::shared_ptr<Script>> LogicLayer::getEventScript(
+  const SignalCommand& cmd)
+{
+  if (!m_scriptProvider) {
+    co_return std::make_shared<Script>();
+  }
+  ScriptKey key(cmd);
+  auto script = co_await m_scriptProvider->asyncGet(key);
+  co_await boost::asio::dispatch(m_ioct, boost::asio::use_awaitable);
+  if (!script) {
+    co_return std::make_shared<Script>();
+  }
+  co_return script;
 }
 
 template<>
@@ -203,28 +249,39 @@ void LogicLayer::notify(const Command& cmd)
     auto& signalCommand = dynamic_cast<const SignalCommand&>(cmd);
     LOG_INFO("Got command {}", (SignalEventType)signalCommand.type()).show();
 
-    switch ((SignalEventType)cmd.type()) {
-    case SignalEventType::CREATED:
-      process<SignalEventType::CREATED>(signalCommand);
-      break;
-    case SignalEventType::ACCEPTED:
-      process<SignalEventType::ACCEPTED>(signalCommand);
-      break;
-    case SignalEventType::PROGRESS:
-      process<SignalEventType::PROGRESS>(signalCommand);
-      break;
-    case SignalEventType::RINGING:
-      process<SignalEventType::RINGING>(signalCommand);
-      break;
-    case SignalEventType::REJECTED:
-      process<SignalEventType::REJECTED>(signalCommand);
-      break;
-    case SignalEventType::MODIFIED:
-      process<SignalEventType::MODIFIED>(signalCommand);
-      break;
-    case SignalEventType::TERMINATED:
-      process<SignalEventType::TERMINATED>(signalCommand);
-    }
+    boost::asio::co_spawn(
+      m_ioct,
+      [this, signalCommand]() -> boost::asio::awaitable<void>
+      {
+        if (co_await handleEventScript(signalCommand)) {
+          co_return;
+        }
+
+        switch ((SignalEventType)signalCommand.type()) {
+        case SignalEventType::CREATED:
+          process<SignalEventType::CREATED>(signalCommand);
+          break;
+        case SignalEventType::ACCEPTED:
+          process<SignalEventType::ACCEPTED>(signalCommand);
+          break;
+        case SignalEventType::PROGRESS:
+          process<SignalEventType::PROGRESS>(signalCommand);
+          break;
+        case SignalEventType::RINGING:
+          process<SignalEventType::RINGING>(signalCommand);
+          break;
+        case SignalEventType::REJECTED:
+          process<SignalEventType::REJECTED>(signalCommand);
+          break;
+        case SignalEventType::MODIFIED:
+          process<SignalEventType::MODIFIED>(signalCommand);
+          break;
+        case SignalEventType::TERMINATED:
+          process<SignalEventType::TERMINATED>(signalCommand);
+        }
+        co_return;
+      },
+      boost::asio::detached);
   }
 }
 

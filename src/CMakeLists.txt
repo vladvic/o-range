@@ -7,9 +7,9 @@ target_link_libraries(o-range PUBLIC
   sip_stack
   r-range
   s2b
+  d2l
 )
 
 target_include_directories(sip_stack PUBLIC
   ${CMAKE_SOURCE_DIR}/include
 )
-
